@@ -56,7 +56,7 @@ namespace OPENAPI40{
         }
 
         public function checkPassword(string $PasswordRaw) : bool{
-            if(md5(\BoostPHP\Encryption\SHA::SHA256Encode($PasswordRaw,$OPENAPISettings['Salt'])) === $this->m_UserRow['password']){
+            if(self::encryptPassword($PasswordRaw) === $this->m_UserRow['password']){
                 return true;
             }else{
                 return false;
@@ -213,6 +213,11 @@ namespace OPENAPI40{
             }
         }
 
+        public function setEmailVerifyCode(string $newVerifyCode) : void{
+            $this->m_UserRow['emailverifycode'] = $newVerifyCode;
+            $this->submitRowInfo();
+        }
+
         public function sendEmailVerifyCode(string $Language = 'x-default') : void{
             //replace '`clientName`' and '`verifyLink`' in templates.
             if($Language !== 'cn' && $Language !== 'en'){
@@ -254,6 +259,35 @@ namespace OPENAPI40{
             }
             $RelatedUsername = $EmailDataRow['result'][0]['username'];
             return new User($RelatedUsername);
+        }
+
+        public static function generateVerifyCode(string $Username) : string{
+            return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Username . time(),$OPENAPISettings['Salt']));
+        }
+
+        protected static function encryptPassword(string $Password) : string{
+            return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Password,$OPENAPISettings['Salt']));
+        }
+
+        public static function registerUser(string $Username, string $Password, string $Email, string $NickName = '') : User{
+            if(empty($NickName))
+                $NickName = $Username;
+            
+            $NewUserRow = array(
+                'username' => $Username,
+                'userdisplayname' => $NickName,
+                'password' => self::encryptPassword($Password,$OPENAPISettings['Salt']),
+                'email' => $Email,
+                'settings' => ["User"]["defaultValues"]['settings'],
+                'thirdauth' => ["User"]["defaultValues"]['thirdauth'],
+                'emailverified' => false,
+                'emailverifycode' => self::generateVerifyCode($Username),
+                'userpermission' => ['User']['defaultValues']['userpermission'],
+                'usergroup' => ["User"]["defaultValues"]['usergroup'],
+                'regtime'=> time()
+            );
+            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'users',$NewUserRow);
+            return new User($Username);
         }
     }
 }

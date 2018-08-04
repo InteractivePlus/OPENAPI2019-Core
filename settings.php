@@ -24,6 +24,13 @@ $OPENAPISettings['CompressIntensity'] = 9; //0 to 9
 
 $OPENAPISettings['DefaultLanguage'] = 'en';
 
+$OPENAPISettings['User']['defaultValues'] = array(
+    'settings' => '{"subscribeToMail":"true"}',
+    'thirdauth' => '{}',
+    'userpermission' => '{"EditUsers": "false", "ViewLogs": "false", "ManageUserGroups": "false", "ChangeUserPermissions": "false"}',
+    'usergroup' => 'normalUsers'
+);
+
 $OPENAPISettings['BlueAirLive']['BaseURL']['cn'] = 'https://ucenter.xsyds.cn/cn/';
 $OPENAPISettings['BlueAirLive']['BaseURL']['en'] = 'https://ucenter.xsyds.cn/en/';
 $OPENAPISettings['BlueAirLive']['BaseURL']['x-default'] = &$OPENAPISettings['BlueAirLive']['BaseURL'][$OPENAPISettings['DefaultLanguage']];
