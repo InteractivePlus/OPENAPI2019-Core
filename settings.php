@@ -20,14 +20,22 @@ $OPENAPISettings['Error']['ErrorCodes'] = array(
 
 $OPENAPISettings['Salt'] = 'XSYDNB';
 
+$OPENAPISettings['RenewTokenWhenChecking'] = true;
+$OPENAPISettings['RenewAPPTokenWhenChecking'] = true;
+$OPENAPISettings['TokenAvailableDuration'] = 3600*24*7;
+$OPENAPISettings['APPTokenAvailableDuration'] = 3600*24*2;
+
+$OPENAPISettings['TokenAvailableAfterIPChange'] = true;
+$OPENAPISettings['APPTokenAvailableAfterIPChange'] = true;
+
 $OPENAPISettings['CompressIntensity'] = 9; //0 to 9
 
 $OPENAPISettings['DefaultLanguage'] = 'en';
 
 $OPENAPISettings['User']['defaultValues'] = array(
-    'settings' => '{"subscribeToMail":"true"}',
-    'thirdauth' => '{}',
-    'userpermission' => '{"EditUsers": "false", "ViewLogs": "false", "ManageUserGroups": "false", "ChangeUserPermissions": "false"}',
+    'settings' => gzcompress('{"subscribeToMail":"true"}',$OPENAPISettings['CompressIntensity']),
+    'thirdauth' => gzcompress('{}',$OPENAPISettings['CompressIntensity']),
+    'userpermission' => gzcompress('{"EditUsers": "false", "ViewLogs": "false", "ManageUserGroups": "false", "ChangeUserPermissions": "false"}',$OPENAPISettings['CompressIntensity']),
     'usergroup' => 'normalUsers'
 );
 

@@ -1,8 +1,9 @@
 <?php
 namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
+    require_once __DIR__ . '/APPs.php';
     class User{
-        protected $m_Username;
+        protected $m_Username = '';
         protected $m_UserRow = array(
             'username' => '',
             'userdisplayname' => '',
@@ -20,8 +21,9 @@ namespace OPENAPI40{
             $mDataArray = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('username'=>$this->m_Username));
             if($mDataArray['count']<1){
                 throw new Exception('Non-existence user');
+                return;
             }
-            $mUserRow = $mDataArray['result'][0];
+            $this->m_UserRow = $mDataArray['result'][0];
         }
         protected function submitRowInfo() : bool{
             $mSubmitState = \BoostPHP\MySQL::updateRows(Internal::$MySQLiConn,'users',$this->m_UserRow,array('username'=>$this->m_Username));
@@ -30,15 +32,24 @@ namespace OPENAPI40{
         public function __construct(string $Username){
             if(!self::checkExist($Username)){
                 throw new Exception('Non-existence user');
+                return;
             }
             $this->m_Username = $Username;
             $this->updateRowInfo();
         }
-        public function delete() : void{
-            //函数施工未完成, 需要将用户从所有APP的manageusers和pendingusers中删除.
-            //另外需要回调所有用户授权中userauth的APP.
+        public function delete() : bool{
+            //施工未完成: 需要回调所有用户授权中userauth的APP.
+            $UserOwnedAPPs = APP::getAPPsIfOwner($this->m_Username);
+            if(!empty($UserOwnedAPPs)){
+                return false;
+            }
+            $UserManagedAPPs = APP::getAPPsOfUser($this->m_Username);
+            foreach($UserManagedAPPs as &$SingleManagedAPPs){
+                $SingleManagedAPPs->deleteFromBothList($this->m_Username);
+            }
+            
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'users',array('username' => $Username));
-            \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'users',array('relateduser'=>$Username));
+            \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'tokens',array('relateduser'=>$Username));
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'apptokens', array('relateduser'=>$Username));
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'verificationcodes',array('username'=>$Username));
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'userauth',array('username'=>$Username));
@@ -64,8 +75,41 @@ namespace OPENAPI40{
         }
 
         public function setPassword(string $newPassword) : void{
-            $this->m_UserRow['password'] = md5(\BoostPHP\BoostPHP\Encryption\SHA::SHA256Encode($newPassword,$OPENAPISettings['Salt']));
+            $this->m_UserRow['password'] = md5(\BoostPHP\BoostPHP\Encryption\SHA::SHA256Encode($newPassword,$GLOBALS['OPENAPISettings']['Salt']));
             $this->submitRowInfo();
+        }
+
+        public function checkToken(string $Token, string $UserIP) : bool{
+            $TokenList = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn,'tokens',array('relateduser'=>$this->m_Username));
+            if($TokenList['count'] < 1){
+                return false;
+            }
+            $mTokenRow = $TokenList['result'][0];
+            if(time() - $mTokenRow['starttime'] > $GLOBALS['OPENAPISettings']['TokenAvailableDuration']){
+                $this->deleteRelatedToken();
+                return false;
+            }
+            if($UserIP !== $mTokenRow['tokenip']){
+                if(!$GLOBALS['OPENAPISettings']['TokenAvailableAfterIPChange'])
+                    return false;
+            }
+            return true;
+        }
+
+        public function autoAssignNewToken(string $UserIP) : string{
+            $newToken = self::generateToken($this->m_Username);
+            $this->assignNewToken($UserIP,$newToken);
+            return $newToken;
+        }
+
+        public function assignNewToken(string $UserIP, string $newToken) : void{
+            $this->deleteRelatedToken();
+            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'tokens',array('token'=>$newToken,'starttime'=>time(),'relateduser'=>$this->m_Username,'tokenip'=>$UserIP));
+            return;
+        }
+
+        public function deleteRelatedToken() : void{
+            \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'tokens',array('relateduser'=>$this->m_Username));
         }
 
         public function getDisplayName() : string{
@@ -92,7 +136,7 @@ namespace OPENAPI40{
         }
 
         public function setSettingsJSON(string $newSettings) : void{
-            $this->m_UserRow['settings'] = gzcompress($newSettings,$OPENAPISettings['CompressIntensity']);
+            $this->m_UserRow['settings'] = gzcompress($newSettings,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
@@ -121,7 +165,7 @@ namespace OPENAPI40{
         }
 
         public function setThirdAuthJSON(string $newThirdAuth) : void{
-            $this->m_UserRow['thirdauth'] = gzcompress($newThirdAuth,$OPENAPISettings['CompressIntensity']);
+            $this->m_UserRow['thirdauth'] = gzcompress($newThirdAuth,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
@@ -159,7 +203,7 @@ namespace OPENAPI40{
         }
 
         public function setPermissionJSON(string $newPermissionJSON) : void{
-            $this->m_UserRow['userpermission'] = gzcompress($newPermissionJSON,$OPENAPISettings['CompressIntensity']);
+            $this->m_UserRow['userpermission'] = gzcompress($newPermissionJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
@@ -168,7 +212,7 @@ namespace OPENAPI40{
             $Permissions = json_decode($PermissionJSON,true);
             unset($PermissionJSON);
             if(!empty($Permissions[$permissionType])){
-                if($Permissions[$permissionType] === "true"){
+                if($Permissions[$permissionType] === 'true'){
                     return true;
                 }else{
                     return false;
@@ -182,7 +226,7 @@ namespace OPENAPI40{
             $PermissionJSON = $this->getPermissionJSON();
             $Permissions = json_decode($PermissionJSON,true);
             unset($PermissionJSON);
-            $Permissions[$permissionType] = $isPermissionAllowed ? "true" : "false";
+            $Permissions[$permissionType] = $isPermissionAllowed ? 'true' : 'false';
             $PermissionJSON = json_encode($Permissions);
             $this->setPermissionJSON($PermissionJSON);
         }
@@ -223,22 +267,22 @@ namespace OPENAPI40{
             if($Language !== 'cn' && $Language !== 'en'){
                 $Language = 'x-default';
             }
-            $VerifyURL = $OPENAPISettings['BlueAirLive']['BaseURL'][$Language] . $OPENAPISettings['BlueAirLive']['Pages']['VerifyEmail'] . $this->m_UserRow['emailverifycode'];
-            $EmailTemplate = $OPENAPISettings['Email']['VerifyTemplate'][$Language];
+            $VerifyURL = $GLOBALS['OPENAPISettings']['BlueAirLive']['BaseURL'][$Language] . $GLOBALS['OPENAPISettings']['BlueAirLive']['Pages']['VerifyEmail'] . $this->m_UserRow['emailverifycode'];
+            $EmailTemplate = $GLOBALS['OPENAPISettings']['Email']['VerifyTemplate'][$Language];
             $EmailTemplate['body'] = \str_replace($this->getDisplayName(),'`clientName`',$EmailTemplate['body']);
             $EmailTemplate['body'] = \str_replace($VerifyURL, '`verifyLink`',$EmailTemplate['body']);
-            $EmailTemplate['body'] = $OPENAPISettings['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $OPENAPISettings['Email']['SharedBottom'][$Language];
+            $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
             \BoostPHP\Mail::sendMail(
-                $OPENAPISettings['Email']['Account']['SMTPPort'],
-                $OPENAPISettings['Email']['Account']['SMTPHost'],
-                $OPENAPISettings['Email']['Account']['SMTPUser'],
-                $OPENAPISettings['Email']['Account']['SMTPPassword'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPHost'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPUser'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPassword'],
                 $this->getEmail(),
                 $EmailTemplate['title'],
                 $EmailTemplate['body'],
-                $OPENAPISettings['Email']['Account']['SMTPSenderAddress'],
-                $OPENAPISettings['Email']['Account']['SMTPSenderName'],
-                $OPENAPISettings['Email']['Account']['SMTPSecureConnection']
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSenderAddress'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSenderName'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSecureConnection']
             );
         }
 
@@ -254,7 +298,7 @@ namespace OPENAPI40{
         public static function getUserByEmail(string $Email) : User{
             $EmailDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('email'=>$Email));
             if($EmailDataRow['count'] < 1){
-                throw new Exception("Non-existence user");
+                throw new Exception('Non-existence user');
                 return null;
             }
             $RelatedUsername = $EmailDataRow['result'][0]['username'];
@@ -262,11 +306,15 @@ namespace OPENAPI40{
         }
 
         public static function generateVerifyCode(string $Username) : string{
-            return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Username . time(),$OPENAPISettings['Salt']));
+            return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Username . time(),$GLOBALS['OPENAPISettings']['Salt']));
         }
 
         protected static function encryptPassword(string $Password) : string{
-            return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Password,$OPENAPISettings['Salt']));
+            return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Password,$GLOBALS['OPENAPISettings']['Salt']));
+        }
+
+        public static function generateToken(string $Username) : string{
+            return md5(\BoostPHP\BoostPHP\Encryption\SHA::SHA256Encode($Username . rand(0,10000) . time(),$GLOBALS['OPENAPISettings']['Salt']));
         }
 
         public static function registerUser(string $Username, string $Password, string $Email, string $NickName = '') : User{
@@ -276,14 +324,14 @@ namespace OPENAPI40{
             $NewUserRow = array(
                 'username' => $Username,
                 'userdisplayname' => $NickName,
-                'password' => self::encryptPassword($Password,$OPENAPISettings['Salt']),
+                'password' => self::encryptPassword($Password,$GLOBALS['OPENAPISettings']['Salt']),
                 'email' => $Email,
-                'settings' => ["User"]["defaultValues"]['settings'],
-                'thirdauth' => ["User"]["defaultValues"]['thirdauth'],
+                'settings' => ['User']['defaultValues']['settings'],
+                'thirdauth' => ['User']['defaultValues']['thirdauth'],
                 'emailverified' => false,
                 'emailverifycode' => self::generateVerifyCode($Username),
                 'userpermission' => ['User']['defaultValues']['userpermission'],
-                'usergroup' => ["User"]["defaultValues"]['usergroup'],
+                'usergroup' => ['User']['defaultValues']['usergroup'],
                 'regtime'=> time()
             );
             \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'users',$NewUserRow);
