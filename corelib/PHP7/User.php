@@ -295,6 +295,35 @@ namespace OPENAPI40{
                 return false;
             }
         }
+
+        public static function checkNickNameExist(string $NickName) : bool{
+            $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('userdisplayname'=>$NickName));
+            if($NickNameDataRow['count'] < 1){
+                return false;
+            }else{
+                return true;
+            }
+        }
+
+        public static function checkEmailExist(string $Email) : bool{
+            $EmailDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('email'=>$Email));
+            if($EmailDataRow['count'] < 1){
+                return false;
+            }else{
+                return true;
+            }
+        }
+
+        public static function getUserByNickName(string $NickName) : User{
+            $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('userdisplayname'=>$NickName));
+            if($NickNameDataRow['count'] < 1){
+                throw new Exception('Non-existence user');
+                return null;
+            }
+            $RelatedUsername = $NickNameDataRow['result'][0]['username'];
+            return new User($RelatedUsername);
+        }
+
         public static function getUserByEmail(string $Email) : User{
             $EmailDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('email'=>$Email));
             if($EmailDataRow['count'] < 1){

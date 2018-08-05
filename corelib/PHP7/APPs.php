@@ -312,5 +312,22 @@ namespace OPENAPI40{
                 }
             }
         }
+        public static function checkDisplayNameExist(string $DisplayName) : bool{
+            $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'apps', array('appdisplayname'=>$DisplayName));
+            if($NickNameDataRow['count'] < 1){
+                return false;
+            }else{
+                return true;
+            }
+        }
+        public static function getAPPByDisplayName(string $DisplayName) : APP{
+            $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'apps', array('appdisplayname'=>$DisplayName));
+            if($NickNameDataRow['count'] < 1){
+                throw new Exception('Non-existence user');
+                return null;
+            }
+            $RelatedAPP = $NickNameDataRow['result'][0]['appid'];
+            return new APP($RelatedAPP);
+        }
     }
 }
