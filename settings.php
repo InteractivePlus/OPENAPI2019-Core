@@ -23,6 +23,7 @@ $OPENAPISettings['RenewTokenWhenChecking'] = true;
 $OPENAPISettings['RenewAPPTokenWhenChecking'] = true;
 $OPENAPISettings['TokenAvailableDuration'] = 3600*24*7;
 $OPENAPISettings['APPTokenAvailableDuration'] = 3600*24*2;
+$OPENAPISettings['VeriCodeAvailableDuration'] = 3600*2;
 
 $OPENAPISettings['TokenAvailableAfterIPChange'] = true;
 $OPENAPISettings['APPTokenAvailableAfterIPChange'] = true;
@@ -98,15 +99,90 @@ $OPENAPISettings['Email']['VerifyTemplate']['en'] = array(
 );
 $OPENAPISettings['Email']['VerifyTemplate']['x-default'] = &$OPENAPISettings['Email']['VerifyTemplate'][$OPENAPISettings['DefaultLanguage']];
 
-$OPENAPISettings['Error']['ErrorCodes'] = array(
-    '0' => 'No error',
-    '1' => 'Credential is not valid',
-    '2' => 'Non-existence user',
-    '3' => 'Existence user',
-    '4' => 'Non-existence data',
-    '5' => 'Existence email',
-    '6' => 'Format Error',
-    '7' => 'Permission Error',
-    '8' => 'Too frequent operation',
-    '500' => 'Internal Error'
+$OPENAPISettings['Email']['VeriCodeTemplate']['cn'] = array(
+    'title' => '重要操作验证码 - BlueAirLive',
+    'body' => file_get_contents(__DIR__ . '/Templates/VeriCode/cn.html')
 );
+$OPENAPISettings['Email']['VeriCodeTemplate']['en'] = array(
+    'title' => 'Important Action Verification Code - BlueAirLive',
+    'body' => file_get_contents(__DIR__ . '/Templates/VeriCode/en.html')
+);
+$OPENAPISettings['Email']['VeriCodeTemplate']['x-default'] = &$OPENAPISettings['Email']['VeriCodeTemplate'][$OPENAPISettings['DefaultLanguage']];
+
+$OPENAPISettings['Error']['ErrorCodes'] = array(
+    '0' => array(
+        'en' => 'No error',
+        'cn' => '无错误'
+    ),
+    '1' => array(
+        'en' => 'Credential is not valid',
+        'cn' => '凭据错误'
+    ),
+    '2' => array(
+        'en' => 'Non-existence user',
+        'cn' => '用户不存在'
+    ),
+    '3' => array(
+        'en' => 'Existence user',
+        'cn' => '用户已存在'
+    ),
+    '4' => array(
+        'en' => 'Non-existence data',
+        'cn' => '数据不存在'
+    ),
+    '5' => array(
+        'en' => 'Existence email',
+        'cn' => '邮箱已存在'
+    ),
+    '6' => array(
+        'en' => 'Existence displayname',
+        'cn' => '展示名已存在'
+    ),
+    '7' => array(
+        'en' => 'Format Error',
+        'cn' => '格式不正确'
+    ),
+    '8' => array(
+        'en' => 'Permission Error',
+        'cn' => '权限错误'
+    ),
+    '9' => array(
+        'en' => 'Too frequent operation',
+        'cn' => '操作过于频繁'
+    ),
+    '500' => array(
+        'en' => 'Internal Error',
+        'cn' => '内部错误'
+    )
+);
+foreach($OPENAPISettings['Error']['ErrorCodes'] as $SingleErrorKey => &$SingleErrorValue){
+    $SingleErrorValue['x-default'] = &$SingleErrorValue[$OPENAPISettings['DefaultLanguage']];
+}
+unset($SingleError);
+
+$OPENAPISettings['VeriCode']['ActionTypes'] = array(
+    '1' => array(
+        'needToken' => false,
+        'cn' => '更改密码',
+        'en' => 'Change Password'
+    ),
+    '2' => array(
+        'needToken' => true,
+        'cn' => '更改邮箱',
+        'en' => 'Change Mail'
+    ),
+    '3' => array(
+        'needToken' => true,
+        'cn' => '删除账号',
+        'en' => 'Delete Account'
+    ),
+    '4' => array(
+        'needToken' => true,
+        'cn' => '删除APPID',
+        'en' => 'Delete APPID'
+    )
+);
+foreach($OPENAPISettings['VeriCode']['ActionTypes'] as &$SingleType){
+    $SingleType['x-default'] = &$SingleType[$OPENAPISettings['DefaultLanguage']];
+}
+unset($SingleType);

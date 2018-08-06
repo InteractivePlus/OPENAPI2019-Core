@@ -98,7 +98,30 @@ namespace OPENAPI40{
                 if(!$GLOBALS['OPENAPISettings']['TokenAvailableAfterIPChange'])
                     return false;
             }
+            if($GLOBALS['OPENAPISettings']['RenewTokenWhenChecking']){
+                $this->renewRelatedToken();
+            }
             return true;
+        }
+
+        public function checkVeriCode(string $Code, int $Action) : bool{
+            $VeriCodeList = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn,'verificationcodes',array('username'=>$this->m_Username, 'actiontype'=>$Action, 'vericode'=>$Code));
+            if($VeriCodeList['count'] < 1){
+                return false;
+            }
+            $mCodeRow = $VeriCodeList['result'][0];
+            if(time() - $mCodeRow['issuetime'] > $GLOBALS['OPENAPISettings']['VeriCodeAvailableDuration']){
+                $this->deleteRelatedVeriCode();
+                return false;
+            }
+            if($mCodeRow['actiontype'] != $Action){
+                return false;
+            }
+            return true;
+        }
+
+        public function checkActionNeedToken(int $Action) : bool{
+            return $GLOBALS['OPENAPISettings']['VeriCode']['ActionTypes'][$Action]['needToken'];
         }
 
         public function autoAssignNewToken(string $UserIP) : string{
@@ -109,12 +132,42 @@ namespace OPENAPI40{
 
         public function assignNewToken(string $UserIP, string $newToken) : void{
             $this->deleteRelatedToken();
-            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'tokens',array('token'=>$newToken,'starttime'=>time(),'relateduser'=>$this->m_Username,'tokenip'=>$UserIP));
-            return;
+            $insertData = array(
+                'token'=>$newToken,
+                'starttime'=>time(),
+                'relateduser'=>$this->m_Username,
+                'tokenip'=>$UserIP
+            );
+            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'tokens',$insertData);
+        }
+
+        public function autoAssignNewVeriCode(int $ActionType) : string{
+            $newVeriCode = self::generateVeriCode($this->m_Username);
+            $this->assignNewVeriCode($ActionType, $newVeriCode);
+            return $newVeriCode;
+        }
+
+        public function assignNewVeriCode(int $ActionType, string $newVeriCode) : void{
+            $this->deleteRelatedVeriCode();
+            $insertData = array(
+                'actiontype' => $ActionType,
+                'vericode' => $newVeriCode,
+                'issuetime' => time(),
+                'username' => $this->m_Username
+            );
+            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'verificationcodes', $insertData);
         }
 
         public function deleteRelatedToken() : void{
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'tokens',array('relateduser'=>$this->m_Username));
+        }
+
+        public function renewRelatedToken() : void{
+            \BoostPHP\MySQL::updateRows(Internal::$MySQLiConn,'token',array('starttime'=>time()), array('relateduser'=>$this->m_Username));
+        }
+
+        public function deleteRelatedVeriCode() : void{
+            \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'verificationcodes',array('username'=>$this->m_Username));
         }
 
         public function getDisplayName() : string{
@@ -291,6 +344,32 @@ namespace OPENAPI40{
             );
         }
 
+        public function sendSecurityVerifyCode(string $Language = 'x-default', string $veriCode, int $ActionType) : void{
+             //replace '`clientName`' and '`actionName`', '`veriCode`' in templates.
+             if($Language !== 'cn' && $Language !== 'en'){
+                $Language = 'x-default';
+            }
+            $actionName = $GLOBALS['OPENAPISettings']['VeriCode']['ActionTypes'][$ActionType][$Language];
+
+            $EmailTemplate = $GLOBALS['OPENAPISettings']['Email']['VeriCodeTemplate'][$Language];
+            $EmailTemplate['body'] = \str_replace($this->getDisplayName(),'`clientName`',$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace($actionName, '`actionName`',$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace($veriCode, '`veriCode`', $EmailTemplate['body']);
+            $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
+            \BoostPHP\Mail::sendMail(
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPHost'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPUser'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPassword'],
+                $this->getEmail(),
+                $EmailTemplate['title'],
+                $EmailTemplate['body'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSenderAddress'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSenderName'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSecureConnection']
+            );
+        }
+
 
         public static function checkExist(string $Username) : bool{
             $UserRowCount = \BoostPHP\MySQL::checkExist(Internal::$MySQLiConn, 'users', array('username'=>$Username));
@@ -319,7 +398,7 @@ namespace OPENAPI40{
             }
         }
 
-        public static function getUserByNickName(string $NickName) : User{
+        public static function getUsersByNickName(string $NickName) : User{
             $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('userdisplayname'=>$NickName));
             if($NickNameDataRow['count'] < 1){
                 throw new Exception('Non-existence user');
@@ -349,6 +428,10 @@ namespace OPENAPI40{
 
         public static function generateToken(string $Username) : string{
             return md5(\BoostPHP\BoostPHP\Encryption\SHA::SHA256Encode($Username . rand(0,10000) . time(),$GLOBALS['OPENAPISettings']['Salt']));
+        }
+
+        public static function generateVeriCode(string $Username) : string{
+            return md5($Username . rand(0,10000) . time() . $GLOBALS['OPENAPISettings']['Salt']);
         }
 
         public static function registerUser(string $Username, string $Password, string $Email, string $NickName = '') : User{

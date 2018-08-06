@@ -249,6 +249,9 @@ namespace OPENAPI40{
                 if(!$GLOBALS['OPENAPISettings']['APPTokenAvailableAfterIPChange'])
                     return false;
             }
+            if($GLOBALS['OPENAPISettings']['RenewAPPTokenWhenChecking']){
+                $this->renewRelatedToken($Username);
+            }
             return true;
         }
 
@@ -269,6 +272,10 @@ namespace OPENAPI40{
 
         public function deleteRelatedToken(string $Username) : void{
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'apptokens',array('relatedapp'=>$this->m_APPID,'relateduser'=>$Username));
+        }
+
+        public function renewRelatedToken(string $Username) : void{
+            \BoostPHP\MySQL::updateRows(Internal::$MySQLiConn, 'apptokens', array('starttime'=>time()), array('relatedapp'=>$this->m_APPID, 'relateduser'=>$Username));
         }
 
         public static function checkExist(string $APPID) : bool{
