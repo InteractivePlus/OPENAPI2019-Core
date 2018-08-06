@@ -7,15 +7,14 @@ $OPENAPISettings['MySQL'] = array(
     'Database' => 'OEPNAPI'
 );
 
-$OPENAPISettings['Error']['ErrorCodes'] = array(
-    '0' => 'No error',
-    '1' => 'Credential is not valid',
-    '2' => 'Non-existence user',
-    '3' => 'Existence user',
-    '4' => 'Format Error',
-    '5' => 'Permission Error',
-    '6' => 'Too frequent operation',
-    '500' => 'Internal Error'
+$OPENAPISettings['Email']['Account'] = array(
+    'SMTPPort' => 25,
+    'SMTPHost' => 'smtp.xsyds.cn',
+    'SMTPUser' => 'publicservice@xsyds.cn',
+    'SMTPPassword' => 'XSYDNB',
+    'SMTPSenderAddress' => 'publicservice@xsyds.cn',
+    'SMTPSenderName' => 'BlueAirLive',
+    'SMTPSecureConnection' => ''
 );
 
 $OPENAPISettings['Salt'] = 'XSYDNB';
@@ -34,9 +33,46 @@ $OPENAPISettings['DefaultLanguage'] = 'en';
 
 $OPENAPISettings['User']['defaultValues'] = array(
     'settings' => gzcompress('{"subscribeToMail":"true"}',$OPENAPISettings['CompressIntensity']),
-    'thirdauth' => gzcompress('{}',$OPENAPISettings['CompressIntensity']),
-    'userpermission' => gzcompress('{"EditUsers": "false", "ViewLogs": "false", "ManageUserGroups": "false", "ChangeUserPermissions": "false"}',$OPENAPISettings['CompressIntensity']),
+    'thirdauth' => gzcompress(
+        '{
+
+        }',
+        $OPENAPISettings['CompressIntensity']
+    ),
+    'userpermission' => gzcompress(
+        '{
+            "EditUsers": "false", 
+            "ViewLogs": "false", 
+            "ManageUserGroups": "false", 
+            "ChangeUserPermissions": "false"
+        }',
+        $OPENAPISettings['CompressIntensity']
+    ),
     'usergroup' => 'normalUsers'
+);
+
+$OPENAPISettings['APP']['defaultValues'] = array(
+    'apppermission' => gzcompress(
+        '{
+            "accessInfo": "true",
+            "sendEmailToUsers": "false"
+        }',
+        $OPENAPISettings['CompressIntensity']
+    ),
+    'manageusers' => gzcompress(
+        '[
+
+        ]',
+        $OPENAPISettings['CompressIntensity']
+    ),
+    'pendingusers' => gzcompress(
+        '[
+            
+        ]',
+        $OPENAPISettings['CompressIntensity']
+    ),
+    'appjumpbackpage' => '',
+    'userdeletedcallback' => ''
 );
 
 $OPENAPISettings['BlueAirLive']['BaseURL']['cn'] = 'https://ucenter.xsyds.cn/cn/';
@@ -62,12 +98,15 @@ $OPENAPISettings['Email']['VerifyTemplate']['en'] = array(
 );
 $OPENAPISettings['Email']['VerifyTemplate']['x-default'] = &$OPENAPISettings['Email']['VerifyTemplate'][$OPENAPISettings['DefaultLanguage']];
 
-$OPENAPISettings['Email']['Account'] = array(
-    'SMTPPort' => 25,
-    'SMTPHost' => 'smtp.xsyds.cn',
-    'SMTPUser' => 'publicservice@xsyds.cn',
-    'SMTPPassword' => 'XSYDNB',
-    'SMTPSenderAddress' => 'publicservice@xsyds.cn',
-    'SMTPSenderName' => 'BlueAirLive',
-    'SMTPSecureConnection' => ''
+$OPENAPISettings['Error']['ErrorCodes'] = array(
+    '0' => 'No error',
+    '1' => 'Credential is not valid',
+    '2' => 'Non-existence user',
+    '3' => 'Existence user',
+    '4' => 'Non-existence data',
+    '5' => 'Existence email',
+    '6' => 'Format Error',
+    '7' => 'Permission Error',
+    '8' => 'Too frequent operation',
+    '500' => 'Internal Error'
 );

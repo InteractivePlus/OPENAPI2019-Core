@@ -329,5 +329,26 @@ namespace OPENAPI40{
             $RelatedAPP = $NickNameDataRow['result'][0]['appid'];
             return new APP($RelatedAPP);
         }
+        public static function registerAPP(string $APPID, string $APPPass, string $adminUser, string $DisplayName = '') : APP{
+            if(self::checkExist($APPID)){
+                throw new Exception("Existence user");
+                return null;
+            }
+            if(empty($DisplayName))
+                $DisplayName = $APPID;
+            $NewAPPRow = array(
+                'appid' => $APPID,
+                'appdisplayname' => $DisplayName,
+                'apppass' => self::encryptAPPPass($APPPass),
+                'apppermission'=>$GLOBALS['OPENAPISettings']['APP']['defaultValues']['apppermission'],
+                'adminuser' => $adminUser,
+                'manageusers' => $GLOBALS['OPENAPISettings']['APP']['defaultValues']['manageusers'],
+                'pendingusers' => $GLOBALS['OPENAPISettings']['APP']['defaultValues']['pendingusers'],
+                'appjumpbackpage' => $GLOBALS['OPENAPISettings']['APP']['defaultValues']['appjumpbackpage'],
+                'userdeletedcallback' => $GLOABLS['OPENAPISettings']['APP']['defaultValues']['userdeletedcallback']
+            );
+            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'apps',$NewAPPRow);
+            return new APP($APPID);
+        }
     }
 }

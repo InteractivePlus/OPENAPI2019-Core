@@ -2,6 +2,7 @@
 namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
     require_once __DIR__ . '/APPs.php';
+    require_once __DIR__ . '/UserAuth.php';
     class User{
         protected $m_Username = '';
         protected $m_UserRow = array(
@@ -38,16 +39,20 @@ namespace OPENAPI40{
             $this->updateRowInfo();
         }
         public function delete() : bool{
-            //施工未完成: 需要回调所有用户授权中userauth的APP.
             $UserOwnedAPPs = APP::getAPPsIfOwner($this->m_Username);
             if(!empty($UserOwnedAPPs)){
                 return false;
             }
+
             $UserManagedAPPs = APP::getAPPsOfUser($this->m_Username);
             foreach($UserManagedAPPs as &$SingleManagedAPPs){
                 $SingleManagedAPPs->deleteFromBothList($this->m_Username);
             }
-            
+            $UserAuthedAPPs = UserAuth::getAllAuthsByUser($this->m_Username);
+            foreach($UserAuthedAPPs as &$SingleAuthedAPPs){
+                $SingleAuthedAPPs->delete();
+            }
+
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'users',array('username' => $Username));
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'tokens',array('relateduser'=>$Username));
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'apptokens', array('relateduser'=>$Username));
@@ -347,6 +352,11 @@ namespace OPENAPI40{
         }
 
         public static function registerUser(string $Username, string $Password, string $Email, string $NickName = '') : User{
+            if(self::checkExist($Username) || self::checkEmailExist($Email)){
+                throw new Exception('Existence user');
+                return null;
+            }
+            
             if(empty($NickName))
                 $NickName = $Username;
             
