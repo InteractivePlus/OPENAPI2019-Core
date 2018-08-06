@@ -28,6 +28,7 @@ namespace OPENAPI40{
                 return;
             }
             $this->m_UserRow = $mDataArray['result'][0];
+            unset($this->m_UserRow['relatedapps']); //防止在APP类更改relatedapps后User submit会导致更改不生效的问题, 反正User不会操作relatedapps, 干脆unset掉
         }
         protected function submitRowInfo() : bool{
             $mSubmitState = \BoostPHP\MySQL::updateRows(Internal::$MySQLiConn,'users',$this->m_UserRow,array('username'=>$this->m_Username));
