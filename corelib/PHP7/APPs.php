@@ -35,8 +35,48 @@ namespace OPENAPI40{
             $this->updateRowInfo();
         }
         public function delete() : void{
+            deleteFromUser($this->getOwnerUsername());
+            $MangageUsers = $this->getManageUsers();
+            foreach($MangageUsers as $SingleManager){
+                deleteFromUser($SingleManager);
+            }   
+            $PendingUsers = $this->getPendingUsers();
+            foreach($PendingUsers as $SinglePending){
+                deleteFromUser($SinglePending);
+            }
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'apps',array('appid'=>$this->m_APPID));
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'userauth',array('appid'=>$this->m_APPID));
+        }
+        protected function addToUser($Username) : void{
+            $ownerRow = \BoostPHP\MYSQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('username'=>$Username));
+            if($ownerRow['count'] < 1){
+                return;
+            }
+            $dataRow = &$ownerRow['result'][0];
+            $ownerRelatedAPPJSON = gzuncompress($dataRow['relatedapps']);
+            $ownerRelatedAPPs = json_decode($ownerRelatedAPPJSON,true);
+            $ownerRelatedAPPs[count($ownerRelatedAPPs)] = $this->m_APPID;
+            $ownerRelatedAPPJSON = json_encode($ownerRelatedAPPs);
+            $dataRow['relatedapps'] = gzcompress($ownerRelatedAPPJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
+            \BoostPHP\MySQL::updateRows(Internal::$MySQLiConn, 'users', array('relatedapps'=>$dataRow['relatedapps']), array('username'=>$Username));
+        }
+
+        protected function deleteFromUser($Username) : void{
+            $ownerRow = \BoostPHP\MYSQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('username'=>$Username));
+            if($ownerRow['count'] < 1){
+                return;
+            }
+            $dataRow = &$ownerRow['result'][0];
+            $ownerRelatedAPPJSON = gzuncompress($dataRow['relatedapps']);
+            $ownerRelatedAPPs = json_decode($ownerRelatedAPPJSON,true);
+            foreach($ownerRelatedAPPs as &$SingleRelatedApps){
+                if($SingleRelatedApps === $this->m_APPID){
+                    unset($SingleRelatedApps);
+                }
+            }
+            $ownerRelatedAPPJSON = json_encode($ownerRelatedAPPs);
+            $dataRow['relatedapps'] = gzcompress($ownerRelatedAPPJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
+            \BoostPHP\MySQL::updateRows(Internal::$MySQLiConn, 'users', array('relatedapps'=>$dataRow['relatedapps']), array('username'=>$Username));
         }
         public function getAPPID() : string{
             return $this->m_APPID;
@@ -99,7 +139,10 @@ namespace OPENAPI40{
         }
 
         public function setOwnerUsername(string $newOwner) : void{
+            $this->deleteFromUser($this->getOwnerUsername);
+            $this->addToUser($newOwner);
             $this->m_APPRow['adminuser'] = $newOwner;
+            $this->submitRowInfo();
         }
 
         public function getManageUsers() : array{
@@ -108,9 +151,10 @@ namespace OPENAPI40{
             return $ManageUsers;
         }
 
-        public function setManageUsers(array $newManageList) : void{
+        protected function setManageUsers(array $newManageList) : void{
             $ManageUsersJSON = json_encode($newManageList);
             $this->m_APPRow['manageusers'] = gzcompress($ManageUsersJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
+            $this->submitRowInfo();
         }
 
         public function addManageUser(string $Username) : void{
@@ -123,6 +167,7 @@ namespace OPENAPI40{
             $OriginalUser = $this->getManageUsers();
             $OriginalUser[count($OriginalUser)] = $Username;
             $this->setManageUsers($OriginalUser);
+            $this->addToUser($Username);
             return;
         }
 
@@ -136,6 +181,7 @@ namespace OPENAPI40{
                 }
             }
             $this->setManageUsers($OriginalUser);
+            $this->deleteFromUser($Username);
         }
 
         public function isManageUser(string $Username) : bool{
@@ -154,7 +200,7 @@ namespace OPENAPI40{
             return $PendingUsers;
         }
 
-        public function setPendingUsers(array $newPendingUserList) : void{
+        protected function setPendingUsers(array $newPendingUserList) : void{
             $PendingUserJSON = json_encode($newPendingUserList);
             $this->m_APPRow['pendingusers'] = gzcompress($PendingUserJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
@@ -169,6 +215,7 @@ namespace OPENAPI40{
             $OriginalUser = $this->getPendingUsers();
             $OriginalUser[count($OriginalUser)] = $Username;
             $this->setPendingUsers($OriginalUser);
+            $this->addToUser($Username);
             return;
         }
 
@@ -182,6 +229,7 @@ namespace OPENAPI40{
                 }
             }
             $this->setPendingUsers($OriginalUser);
+            $this->deleteFromUser($Username);
         }
 
         public function isPendingUser(string $Username) : bool{
@@ -305,20 +353,34 @@ namespace OPENAPI40{
             }
         }
         public static function getAPPsOfUser(string $Username) : array{
+            $UserDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('username'=>$Username));
+            if($UserDataRow['count'] < 1){
+                throw new Exception("Non-existence user");
+                return array();
+            }
+            $SingleUserRow = &$UserDataRow['result'][0];
+            $UserRelatedAPPs = json_decode(gzuncompress($SingleUserRow['relatedapps']),true);
+            $Apps = array();
+            foreach($UserRelatedAPPs as &$SingleRelatedAPP){
+                $Apps[count($Apps)] = new APP($SingleRelatedAPP);
+            }
+            return $Apps;
+        }
+
+        public static function getAPPsBySearching(string $APPID = '') : array{
             $mDataArray = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'apps');
             if($mDataArray['count']<1){
                 return array();
-            }else{
-                $mRstArray = array();
-                foreach($mDataArray['result'] as $SingleAPPRow){
-                    $tmpAPP = new APP($SingleAPPRow['appid']);
-                    if($tmpAPP->isUserInAPP($Username) !== "false"){
-                        $mRstArray[count($mRstArray)] = $tmpAPP;
-                    }
-                    unset($tmpAPP);
+            }
+            $SearchRst = array();
+            foreach($mDataArray['result'] as &$SingleRow){
+                if(empty($APPID) || strpos($SingleRow['appid'],$APPID) !== false){
+                    $SearchRst[count($SearchRst)] = new APP($SingleRow['appid']);
                 }
             }
+            return $SearchRst;
         }
+
         public static function checkDisplayNameExist(string $DisplayName) : bool{
             $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'apps', array('appdisplayname'=>$DisplayName));
             if($NickNameDataRow['count'] < 1){
@@ -355,7 +417,9 @@ namespace OPENAPI40{
                 'userdeletedcallback' => $GLOABLS['OPENAPISettings']['APP']['defaultValues']['userdeletedcallback']
             );
             \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'apps',$NewAPPRow);
-            return new APP($APPID);
+            $myAPP = new APP($APPID);
+            $myAPP->addToUser($adminUser);
+            return $myAPP;
         }
     }
 }

@@ -3,6 +3,8 @@ namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
     require_once __DIR__ . '/APPs.php';
     require_once __DIR__ . '/UserAuth.php';
+    require_once __DIR__ . '/UserGroup.php';
+
     class User{
         protected $m_Username = '';
         protected $m_UserRow = array(
@@ -16,6 +18,7 @@ namespace OPENAPI40{
             'emailverifycode'=>'',
             'userpermission'=>'',
             'usergroup'=>'',
+            'relatedapps'=>'',
             'regtime'=>0
         );
         protected function updateRowInfo() : void{
@@ -256,6 +259,11 @@ namespace OPENAPI40{
             $this->setThirdAuthJSON($ThirdAuthJSON);
         }
 
+        public function checkHasPermission(string $permissionType) : bool{
+            $UserRelatedGroup = UserGroup::getGroupByUser($this->m_Username);
+            return ($UserRelatedGroup->getPermission($permissionType) || $this->getPermission($permissionType));
+        }
+
         public function getPermissionJSON() : string{
             return gzuncompress($this->m_UserRow['userpermission']);
         }
@@ -418,6 +426,20 @@ namespace OPENAPI40{
             return new User($RelatedUsername);
         }
 
+        public static function getUsersBySearching(string $SearchUsername = '') : array{
+            $UserDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users');
+            if($UserDataRow['count'] < 1){
+                return array();
+            }
+            $UserRst = array();
+            foreach($UserDataRow['result'] as &$SingleData){
+                if(empty($SearchUsername)||strpos($SingleData['username'],$SearchUsername) !== false){
+                    $UserRst[count($UserRst)] = new User($SingleData['username']);
+                }
+            }
+            return $UserRst;
+        }
+
         public static function generateVerifyCode(string $Username) : string{
             return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Username . time(),$GLOBALS['OPENAPISettings']['Salt']));
         }
@@ -434,12 +456,20 @@ namespace OPENAPI40{
             return md5($Username . rand(0,10000) . time() . $GLOBALS['OPENAPISettings']['Salt']);
         }
 
-        public static function registerUser(string $Username, string $Password, string $Email, string $NickName = '') : User{
-            if(self::checkExist($Username) || self::checkEmailExist($Email)){
+        public static function registerUser(string $Username, string $Password, string $Email, string $NickName) : User{
+            if(self::checkExist($Username)){
                 throw new Exception('Existence user');
                 return null;
             }
-            
+            if(self::checkEmailExist($Email)){
+                throw new Exception('Existence email');
+                return null;
+            }
+            if(self::checkNickNameExist($NickName)){
+                throw new Exception('Existence displayname');
+                return null;
+            }
+
             if(empty($NickName))
                 $NickName = $Username;
             
@@ -448,13 +478,14 @@ namespace OPENAPI40{
                 'userdisplayname' => $NickName,
                 'password' => self::encryptPassword($Password,$GLOBALS['OPENAPISettings']['Salt']),
                 'email' => $Email,
-                'settings' => ['User']['defaultValues']['settings'],
-                'thirdauth' => ['User']['defaultValues']['thirdauth'],
+                'settings' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['settings'],
+                'thirdauth' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['thirdauth'],
                 'emailverified' => false,
                 'emailverifycode' => self::generateVerifyCode($Username),
-                'userpermission' => ['User']['defaultValues']['userpermission'],
-                'usergroup' => ['User']['defaultValues']['usergroup'],
-                'regtime'=> time()
+                'userpermission' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['userpermission'],
+                'usergroup' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['usergroup'],
+                'regtime'=> time(),
+                'relatedapps' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['relatedapps']
             );
             \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'users',$NewUserRow);
             return new User($Username);

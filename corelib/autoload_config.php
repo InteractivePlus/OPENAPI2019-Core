@@ -4,7 +4,8 @@ namespace OPENAPI40\Autoload{
         public static $RequiredFiles = array(
             'User.php',
             'APPs.php',
-            'UserAuth.php'
+            'UserAuth.php',
+            'UserGroup.php'
         );
     }
 }

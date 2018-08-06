@@ -49,7 +49,13 @@ $OPENAPISettings['User']['defaultValues'] = array(
         }',
         $OPENAPISettings['CompressIntensity']
     ),
-    'usergroup' => 'normalUsers'
+    'usergroup' => 'normalUsers',
+    'relatedapps' => gzcompress(
+        '[
+            
+        ]',
+        $OPENAPISettings['CompressIntensity']
+    )
 );
 
 $OPENAPISettings['APP']['defaultValues'] = array(

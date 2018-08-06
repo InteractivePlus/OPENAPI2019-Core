@@ -1,5 +1,6 @@
 <?php
 namespace OPENAPI40{
+    require_once __DIR__ . '/internal/OPENAPI.internal.php';
     require_once __DIR__ . '/APPs.php';
     class UserAuth{
         protected $m_Username = '';
@@ -23,7 +24,7 @@ namespace OPENAPI40{
         }
         public function __construct(string $Username, string $APPID){
             if(!self::checkExist($Username, $APPID)){
-                throw new Exception('Non-existence user');
+                throw new Exception('Non-existence data');
                 return;
             }
             $this->m_Username = $Username;
@@ -34,6 +35,14 @@ namespace OPENAPI40{
             $myAPP = new APP($this->m_APPID);
             $myAPP->callUserDeletedURL($this->m_Username);
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn, 'userauth', $this->m_AuthRow, array('username'=>$this->m_Username,'appid'=>$this->m_APPID));
+        }
+
+        public function getUsername() : string{
+            return $this->m_Username;
+        }
+
+        public function getAPPID() : string{
+            return $this->m_APPID;
         }
 
         public function getAuthContent() : array{
