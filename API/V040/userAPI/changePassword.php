@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '../sharedRequirements.php';
+require_once __DIR__ . '/../sharedRequirements.php';
 $Username = $_POST['userName'];
 $veriCode = $_POST['veriCode'];
 $Password = $_POST['newPassword'];

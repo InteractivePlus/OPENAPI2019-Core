@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '../sharedRequirements.php';
+require_once __DIR__ . '/../sharedRequirements.php';
 $Username = $_POST['userName'];
 $Token = $_POST['token'];
 if(!OPENAPI40\User::checkExist($Username)){
