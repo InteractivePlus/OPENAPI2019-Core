@@ -268,6 +268,33 @@ namespace OPENAPI40{
             }
         }
 
+        public function sendThirdPartyEmail(string $toAddr, string $mailTitle, string $mailBody, string $Language) : bool{
+            if($Language !== 'cn' && $Language !== 'en'){
+                $Language = 'x-default';
+            }
+
+            $EmailTemplate = $GLOBALS['OPENAPISettings']['Email']['ThirdPartyMail'][$Language];
+            $EmailTemplate['body'] = \str_replace($this->getAPPDisplayName(),'`appDisplayName`',$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace($this->getAPPID(), '`appID`', $EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace($mailBody, '`thirdPartyMailBody`', $EmailTemplate['body']);
+            $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
+            $EmailTemplate['title'] = \str_replace($this->getAPPDisplayName(),'`appDisplayName`',$EmailTemplate['title']);
+            $EmailTemplate['title'] = \str_replace($this->getAPPID(), '`appID`', $EmailTemplate['title']);
+            $EmailTemplate['title'] = \str_replace($mailTitle,'`thirdPartyMailTitle`',$EmailTemplate['title']);
+            return \BoostPHP\Mail::sendMail(
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPHost'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPUser'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPassword'],
+                $toAddr,
+                $EmailTemplate['title'],
+                $EmailTemplate['body'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSenderAddress'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSenderName'],
+                $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPSecureConnection']
+            );
+        }
+
         public function getAPPJumpBackPageURL() : string{
             return $this->m_APPRow['appjumpbackpage'];
         }
@@ -307,7 +334,7 @@ namespace OPENAPI40{
                 $this->deleteRelatedToken($Username);
                 return false;
             }
-            if($APPIP !== $mTokenRow['tokenip']){
+            if($APPIP !== $mTokenRow['tokenip'] && !empty($mTokenRow['tokenip'])){
                 if(!$GLOBALS['OPENAPISettings']['APPTokenAvailableAfterIPChange'])
                     return false;
             }

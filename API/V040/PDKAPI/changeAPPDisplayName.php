@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../sharedRequirements.php';
 $manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $APPID = $_POST['appID'];

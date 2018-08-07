@@ -348,7 +348,7 @@ namespace OPENAPI40{
             $this->submitRowInfo();
         }
 
-        public function sendEmailVerifyCode(string $Language = 'x-default') : void{
+        public function sendEmailVerifyCode(string $Language = 'x-default') : bool{
             //replace '`clientName`' and '`verifyLink`' in templates.
             if($Language !== 'cn' && $Language !== 'en'){
                 $Language = 'x-default';
@@ -358,7 +358,7 @@ namespace OPENAPI40{
             $EmailTemplate['body'] = \str_replace($this->getDisplayName(),'`clientName`',$EmailTemplate['body']);
             $EmailTemplate['body'] = \str_replace($VerifyURL, '`verifyLink`',$EmailTemplate['body']);
             $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
-            \BoostPHP\Mail::sendMail(
+            return \BoostPHP\Mail::sendMail(
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPHost'],
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPUser'],
@@ -372,9 +372,9 @@ namespace OPENAPI40{
             );
         }
 
-        public function sendSecurityVerifyCode(string $Language = 'x-default', string $veriCode, int $ActionType) : void{
+        public function sendSecurityVerifyCode(string $Language = 'x-default', string $veriCode, int $ActionType) : bool{
              //replace '`clientName`' and '`actionName`', '`veriCode`' in templates.
-             if($Language !== 'cn' && $Language !== 'en'){
+            if($Language !== 'cn' && $Language !== 'en'){
                 $Language = 'x-default';
             }
             $actionName = $GLOBALS['OPENAPISettings']['VeriCode']['ActionTypes'][$ActionType][$Language];
@@ -384,7 +384,7 @@ namespace OPENAPI40{
             $EmailTemplate['body'] = \str_replace($actionName, '`actionName`',$EmailTemplate['body']);
             $EmailTemplate['body'] = \str_replace($veriCode, '`veriCode`', $EmailTemplate['body']);
             $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
-            \BoostPHP\Mail::sendMail(
+            return \BoostPHP\Mail::sendMail(
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPHost'],
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPUser'],

@@ -171,6 +171,16 @@ $OPENAPISettings['Email']['VeriCodeTemplate']['en'] = array(
 );
 $OPENAPISettings['Email']['VeriCodeTemplate']['x-default'] = &$OPENAPISettings['Email']['VeriCodeTemplate'][$OPENAPISettings['DefaultLanguage']];
 
+$OPENAPISettings['Email']['ThirdPartyMail']['cn'] = array(
+    'title' => '`thirdPartyMailTitle` - `appDisplayName`|BlueAirLive',
+    'body' => file_get_contents(__DIR__ . '/Templates/ThirdPartyMailTemplate/cn.html')
+);
+$OPENAPISettings['Email']['ThirdPartyMail']['en'] = array(
+    'title' => '`thirdPartyMailTitle` - `appDisplayName`|BlueAirLive',
+    'body' => file_get_contents(__DIR__ . '/Templates/ThirdPartyMailTemplate/en.html')
+);
+$OPENAPISettings['Email']['ThirdPartyMail']['x-default'] = &$OPENAPISettings['Email']['ThirdPartyMail'][$OPENAPISettings['DefaultLanguage']];
+
 $OPENAPISettings['Error']['ErrorCodes'] = array(
     '0' => array(
         'en' => 'No error',
