@@ -52,6 +52,18 @@ namespace OPENAPI40{
         }
 
         public function setAuthContent(array $AuthContent) : void{
+            foreach($AuthContent as $SingleAuthKey => &$SingleAuth){
+                $CanFind = false;
+                foreach($GLOBALS['OPENAPISettings']['Fieldnames']['UserAuth'] as $AuthField){
+                    if($AuthField === $SingleAuthKey){
+                        $CanFind = true;
+                        break;
+                    }
+                }
+                if(!$CanFind){
+                    unset($SingleAuth);
+                }
+            }
             $AuthJSON = json_encode($AuthContent);
             $this->m_AuthRow['authcontent'] = gzcompress($AuthJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
@@ -109,6 +121,47 @@ namespace OPENAPI40{
             }else{
                 return true;
             }
+        }
+
+        public static function createAuthContent(string $Username, string $APPID, array $AuthContent = array()) : UserAuth{
+            $userCount = \BoostPHP\MySQL::checkExist(Internal::$MySQLiConn,'users',array('username'=>$Username));
+            if($userCount < 1){
+                throw new Exception('Non-existence user');
+                return null;
+            }
+            $APPCount = \BoostPHP\MySQL::checkExist(Internal::$MySQLiConn, 'apps', array('apppid'=>$APPID));
+            if($APPCount < 1){
+                throw new Exception('Non-existence user');
+                return null;
+            }
+            if(self::checkExist($Username,$APPID)){
+                throw new Exception('Existence user');
+                return null;
+            }
+            foreach($GLOBALS['OPENAPISettings']['UserAuth']['defaultValues'] as $defaultKey => &$defaultVal){
+                if(empty($AuthContent[$defaultKey])){
+                    $AuthContent[$defaultKey] = $defaultVal;
+                }
+            }
+            foreach($AuthContent as $SingleAuthKey => &$SingleAuth){
+                $CanFind = false;
+                foreach($GLOBALS['OPENAPISettings']['Fieldnames']['UserAuth'] as &$AuthField){
+                    if($AuthField === $SingleAuthKey){
+                        $CanFind = true;
+                        break;
+                    }
+                }
+                if(!$CanFind){
+                    unset($SingleAuth);
+                }
+            }
+            $insertArray = array(
+                'username' => $Username,
+                'appid' => $APPID,
+                'authcontent' => gzcompress(json_encode($AuthContent),$GLOBALS['OPENAPISettings']['CompressIntensity'])
+            );
+            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn, 'userauth', $insertArray);
+            return new UserAuth($Username,$APPID);
         }
     }
 }

@@ -17,6 +17,26 @@ $OPENAPISettings['Email']['Account'] = array(
     'SMTPSecureConnection' => ''
 );
 
+$OPENAPISettings['Fieldnames']['Settings'] = array(
+    'subscribeToMail',
+    'area'
+);
+$OPENAPISettings['Fieldnames']['UserAuth'] = array(
+    'accessInfo',
+    'sendEmailToMe'
+);
+
+$OPENAPISettings['Fieldnames']['Permission'] = array(
+    'EditUsers',
+    'ViewLogs',
+    'ManageUserGroups',
+    'ChangeUserPermissions'
+);
+$OPENAPISettings['Fieldnames']['APPPermission'] = array(
+    'accessInfo',
+    'sendEmailToUsers'
+);
+
 $OPENAPISettings['Salt'] = 'XSYDNB';
 
 $OPENAPISettings['RenewTokenWhenChecking'] = true;
@@ -69,6 +89,18 @@ $OPENAPISettings['User']['defaultValues'] = array(
     )
 );
 
+$OPENAPISettings['UserGroup']['defaultValues'] = array(
+    'grouppermission' => gzcompress(
+        '{
+            "EditUsers": "false",
+            "ViewLogs": "false", 
+            "ManageUserGroups": "false", 
+            "ChangeUserPermissions": "false"
+        }',
+        $OPENAPISettings['CompressIntensity']
+    )
+);
+
 $OPENAPISettings['APP']['defaultValues'] = array(
     'apppermission' => gzcompress(
         '{
@@ -91,6 +123,11 @@ $OPENAPISettings['APP']['defaultValues'] = array(
     ),
     'appjumpbackpage' => '',
     'userdeletedcallback' => ''
+);
+
+$OPENAPISettings['UserAuth']['defaultValues'] = array(
+    'accessInfo' => "true",
+    "sendEmailToMe" => "false"
 );
 
 $OPENAPISettings['BlueAirLive']['BaseURL']['cn'] = 'https://ucenter.xsyds.cn/cn/';

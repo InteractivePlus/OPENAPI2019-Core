@@ -124,7 +124,7 @@ namespace OPENAPI40{
             return true;
         }
 
-        public function checkActionNeedToken(int $Action) : bool{
+        public static function checkActionNeedToken(int $Action) : bool{
             return $GLOBALS['OPENAPISettings']['VeriCode']['ActionTypes'][$Action]['needToken'];
         }
 
@@ -193,19 +193,29 @@ namespace OPENAPI40{
             return;
         }
 
-        public function getSettingsJSON() : string{
-            return gzuncompress($this->m_UserRow['settings']);
+        public function getSettings() : array{
+            return json_decode(gzuncompress($this->m_UserRow['settings']),true);
         }
 
-        public function setSettingsJSON(string $newSettings) : void{
-            $this->m_UserRow['settings'] = gzcompress($newSettings,$GLOBALS['OPENAPISettings']['CompressIntensity']);
+        public function setSettings(array $newSettings) : void{
+            foreach($newSettings as $SingleSettingKey => &$SingleSetting){
+                $CanFind = false;
+                foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Settings'] as $SettingField){
+                    if($SettingField === $SingleSettingKey){
+                        $CanFind = true;
+                        break;
+                    }
+                }
+                if(!$CanFind){
+                    unset($SingleSetting);
+                }
+            }
+            $this->m_UserRow['settings'] = gzcompress(json_encode($newSettings),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
         public function getSetting(string $settingItem){
-            $SettingJSON = $this->getSettingsJSON();
-            unset($SettingJSON);
-            $Settings = json_decode($SettingJSON,true);
+            $Settings = $this->getSettings();
             if(!empty($Settings[$settingItem])){
                 return $Settings[$settingItem];
             }else{
@@ -214,27 +224,22 @@ namespace OPENAPI40{
         }
 
         public function setSetting(string $settingItem, $value) : void{
-            $SettingJSON = $this->getSettingsJSON();
-            unset($SettingJSON);
-            $Settings = json_decode($SettingJSON,true);
+            $Settings = $this->getSettings();
             $Settings[$settingItem] = $value;
-            $SettingJSON = json_encode($Settings);
-            $this->setSettingsJSON($SettingJSON);
+            $this->setSettingsJSON($Settings);
         }
 
-        public function getThirdAuthJSON() : string{
-            return gzuncompress($this->m_UserRow['thirdauth']);
+        public function getThirdAuths() : array{
+            return json_decode(gzuncompress($this->m_UserRow['thirdauth']),true);
         }
 
-        public function setThirdAuthJSON(string $newThirdAuth) : void{
-            $this->m_UserRow['thirdauth'] = gzcompress($newThirdAuth,$GLOBALS['OPENAPISettings']['CompressIntensity']);
+        public function setThirdAuths(array $newThirdAuth) : void{
+            $this->m_UserRow['thirdauth'] = gzcompress(json_encode($newThirdAuth),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
         public function getThirdAuth(string $authName) : array{
-            $ThirdAuthJSON = $this->getThirdAuthJSON();
-            $ThirdAuths = json_decode($ThirdAuthJSON,true);
-            unset($ThirdAuthJSON);
+            $ThirdAuths = $this->getThirdAuths();
             if(!empty($ThirdAuths[$authName])){
                 return $ThirdAuths[$authName];
             }else{
@@ -243,21 +248,15 @@ namespace OPENAPI40{
         }
 
         public function setThirdAuth(string $authName, array $authValue) : void{
-            $ThirdAuthJSON = $this->getThirdAuthJSON();
-            $ThirdAuths = json_decode($ThirdAuthJSON,true);
-            unset($ThirdAuthJSON);
+            $ThirdAuths = $this->getThirdAuths();
             $ThirdAuths[$authName] = $authValue;
-            $ThirdAuthJSON = json_encode($ThirdAuths);
-            $this->setThirdAuthJSON($ThirdAuthJSON);
+            $this->setThirdAuths($ThirdAuths);
         }
 
         public function deleteThirdAuth(string $authName) : void{
-            $ThirdAuthJSON = $this->getThirdAuthJSON();
-            $ThirdAuths = json_decode($ThirdAuthJSON,true);
-            unset($ThirdAuthJSON);
+            $ThirdAuths = $this->getThirdAuths();
             unset($ThirdAuths[$authName]);
-            $ThirdAuthJSON = json_encode($ThirdAuths);
-            $this->setThirdAuthJSON($ThirdAuthJSON);
+            $this->setThirdAuths($ThirdAuths);
         }
 
         public function checkHasPermission(string $permissionType) : bool{
@@ -265,12 +264,24 @@ namespace OPENAPI40{
             return ($UserRelatedGroup->getPermission($permissionType) || $this->getPermission($permissionType));
         }
 
-        public function getPermissionJSON() : string{
-            return gzuncompress($this->m_UserRow['userpermission']);
+        public function getPermissions() : array{
+            return json_decode(gzuncompress($this->m_UserRow['userpermission']),true);
         }
 
-        public function setPermissionJSON(string $newPermissionJSON) : void{
-            $this->m_UserRow['userpermission'] = gzcompress($newPermissionJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
+        public function setPermissions(array $newPermission) : void{
+            foreach($newPermission as $SinglePermissionKey => &$SinglePermission){
+                $CanFind = false;
+                foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Permission'] as $PermField){
+                    if($PermField === $SinglePermissionKey){
+                        $CanFind = true;
+                        break;
+                    }
+                }
+                if(!$CanFind){
+                    unset($SinglePermission);
+                }
+            }
+            $this->m_UserRow['userpermission'] = gzcompress(json_encode($newPermissionJSON),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
@@ -457,11 +468,13 @@ namespace OPENAPI40{
             return md5($Username . rand(0,10000) . time() . $GLOBALS['OPENAPISettings']['Salt']);
         }
 
-        public static function registerUser(string $Username, array $Settings , string $Password, string $Email, string $NickName) : User{
+        public static function registerUser(string $Username, string $Password, string $Email, string $NickName, array $Settings = array()) : User{
             $OverSettings = $GLOBALS['OPENAPISettings']['User']['defaultValues']['settings'];
-            foreach($OverSettings as $SingleSettingKey => &$SingleSettingVal){
-                if(!empty($Settings[$SingleSettingKey])){
-                    $SingleSettingVal = $Settings[$SingleSettingKey];
+            if(!empty($Settings)){
+                foreach($OverSettings as $SingleSettingKey => &$SingleSettingVal){
+                    if(!empty($Settings[$SingleSettingKey])){
+                        $SingleSettingVal = $Settings[$SingleSettingKey];
+                    }
                 }
             }
 
@@ -486,7 +499,7 @@ namespace OPENAPI40{
                 'userdisplayname' => $NickName,
                 'password' => self::encryptPassword($Password,$GLOBALS['OPENAPISettings']['Salt']),
                 'email' => $Email,
-                'settings' => gzcompress(json_encode(OverSettings),$GLOABLS['OPENAPISettings']['CompressIntensity']),
+                'settings' => gzcompress(json_encode($OverSettings),$GLOABLS['OPENAPISettings']['CompressIntensity']),
                 'thirdauth' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['thirdauth'],
                 'emailverified' => false,
                 'emailverifycode' => self::generateVerifyCode($Username),

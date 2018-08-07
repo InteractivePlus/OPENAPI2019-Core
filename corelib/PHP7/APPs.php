@@ -104,17 +104,27 @@ namespace OPENAPI40{
             $this->m_APPRow['apppass'] = self::encryptAPPPass($newPassword);
             $this->submitRowInfo();
         }
-        public function getPermissionJSON() : string{
-            return gzuncompress($this->m_APPRow['apppermission']);
+        public function getPermissions() : array{
+            return json_decode(gzuncompress($this->m_APPRow['apppermission']),true);
         }
-        public function setPermissionJSON(string $newJSON) : void{
-            $this->m_APPID['apppermission'] = gzcompress($newJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
+        public function setPermissions(array $newPermission) : void{
+            foreach($newPermission as $SinglePermissionKey => &$SinglePermission){
+                $CanFind = false;
+                foreach($GLOBALS['OPENAPISettings']['Fieldnames']['APPPermission'] as $PermField){
+                    if($PermField === $SinglePermissionKey){
+                        $CanFind = true;
+                        break;
+                    }
+                }
+                if(!$CanFind){
+                    unset($SinglePermission);
+                }
+            }
+            $this->m_APPID['apppermission'] = gzcompress(json_encode($newPermission),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
         public function getPermission(string $permissionItem) : bool{
-            $PermissionJSON = $this->getPermission();
-            $Permissions = json_decode($PermissionJSON,true);
-            unset($PermissionJSON);
+            $Permissions = $this->getPermissions();
             if(!empty($Permissions[$permissionItem])){
                 if($Permissions[$permissionItem] === 'true'){
                     return true;
@@ -126,12 +136,9 @@ namespace OPENAPI40{
             }
         }
         public function setPermission(string $permissionItem, bool $newValue) : void{
-            $PermissionJSON = $this->getPermission();
-            $Permissions = json_decode($PermissionJSON,true);
-            unset($PermissionJSON);
+            $Permissions = $this->getPermissions();
             $Permissions[$permissionItem] = ($newValue ? 'true' : 'false');
-            $PermissionJSON = json_encode($Permissions);
-            $this->setPermissionJSON($PermissionJSON);
+            $this->setPermissions($Permissions);
         }
 
         public function getOwnerUsername() : string{

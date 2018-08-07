@@ -19,5 +19,6 @@ if(OPENAPI40\User::checkNickNameExist($Username)){
 if(OPENAPI40\User::checkEmailExist($Email)){
     generalReturn(true,5,$Language);
 }
-$myUser = OPENAPI40\User::registerUser($Username,json_decode($Settings,true),$Password,$Email,$DisplayName);
+$myUser = OPENAPI40\User::registerUser($Username,$Password,$Email,$DisplayName,!empty($Settings) ? json_decode($Settings,true) : array());
+$myUser->sendEmailVerifyCode($Language);
 generalReturn(false,0,$Language);

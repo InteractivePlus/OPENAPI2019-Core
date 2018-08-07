@@ -19,7 +19,7 @@ namespace OPENAPI40{
             return self::CheckUserValid($Username,$GLOBALS['OPENAPISettings']['User']['UsernameLength']['min'],$GLOBALS['OPENAPISettings']['User']['UsernameLength']['max']);
         }
         public static function CheckEmailAddr(string $C_mailaddr) : bool{
-            return preg_match("/^[_a-zA-Z0-9-]+(.[_a-zA-Z0-9-]+)*@[_a-zA-Z0-9-]+(.[_a-zA-Z0-9-]+)*$/", $C_mailaddr) ? true : false;
+            return preg_match("/^[_a-zA-Z0-9\-]+(.[_a-zA-Z0-9\-]+)*@[_a-zA-Z0-9\-]+(\.[_a-zA-Z0-9\-]+)*$/", $C_mailaddr) ? true : false;
         }
         protected static function checkPasswordValid(string $C_Password, int $min_CharNum = 0, int $max_CharNum = -1) : bool{
             if($min_CharNum > 0 || $max_CharNum != -1){
