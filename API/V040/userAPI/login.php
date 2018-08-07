@@ -12,5 +12,8 @@ $myUser = new OPENAPI40\User($Username);
 if(!$myUser->checkPassword($Password)){
     generalReturn(true,1,$Language);
 }
+if(!$myUser->isMailVerified()){
+    generalReturn(true,10,$Language);
+}
 $newToken = $myUser->autoAssignNewToken();
 generalReturn(false,0,$Language,array('token'=>$newToken));

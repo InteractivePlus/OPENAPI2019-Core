@@ -167,6 +167,10 @@ $OPENAPISettings['Error']['ErrorCodes'] = array(
         'en' => 'Too frequent operation',
         'cn' => '操作过于频繁'
     ),
+    '10' => array(
+        'en' => 'Email not verified',
+        'cn' => '邮箱未验证'
+    ),
     '500' => array(
         'en' => 'Internal Error',
         'cn' => '内部错误'
