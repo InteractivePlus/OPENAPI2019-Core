@@ -5,7 +5,8 @@ namespace OPENAPI40\Autoload{
             'User.php',
             'APPs.php',
             'UserAuth.php',
-            'UserGroup.php'
+            'UserGroup.php',
+            'FormatVerify.php'
         );
     }
 }

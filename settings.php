@@ -32,8 +32,19 @@ $OPENAPISettings['CompressIntensity'] = 9; //0 to 9
 
 $OPENAPISettings['DefaultLanguage'] = 'en';
 
+$OPENAPISettings['User']['PasswordLength'] = array(
+    'min' => 12,
+    'max' => 30
+);
+$OPENAPISettings['User']['UsernameLength'] = array(
+    'min' => 6,
+    'max' => 30
+);
 $OPENAPISettings['User']['defaultValues'] = array(
-    'settings' => gzcompress('{"subscribeToMail":"true"}',$OPENAPISettings['CompressIntensity']),
+    'settings' => array(
+        "subscribeToMail" => "true",
+        "area" => "zh-CN"
+    ),
     'thirdauth' => gzcompress(
         '{
 

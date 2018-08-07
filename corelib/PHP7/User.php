@@ -457,7 +457,14 @@ namespace OPENAPI40{
             return md5($Username . rand(0,10000) . time() . $GLOBALS['OPENAPISettings']['Salt']);
         }
 
-        public static function registerUser(string $Username, string $Password, string $Email, string $NickName) : User{
+        public static function registerUser(string $Username, array $Settings , string $Password, string $Email, string $NickName) : User{
+            $OverSettings = $GLOBALS['OPENAPISettings']['User']['defaultValues']['settings'];
+            foreach($OverSettings as $SingleSettingKey => &$SingleSettingVal){
+                if(!empty($Settings[$SingleSettingKey])){
+                    $SingleSettingVal = $Settings[$SingleSettingKey];
+                }
+            }
+
             if(self::checkExist($Username)){
                 throw new Exception('Existence user');
                 return null;
@@ -479,7 +486,7 @@ namespace OPENAPI40{
                 'userdisplayname' => $NickName,
                 'password' => self::encryptPassword($Password,$GLOBALS['OPENAPISettings']['Salt']),
                 'email' => $Email,
-                'settings' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['settings'],
+                'settings' => gzcompress(json_encode(OverSettings),$GLOABLS['OPENAPISettings']['CompressIntensity']),
                 'thirdauth' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['thirdauth'],
                 'emailverified' => false,
                 'emailverifycode' => self::generateVerifyCode($Username),
