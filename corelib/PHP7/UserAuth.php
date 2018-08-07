@@ -69,6 +69,14 @@ namespace OPENAPI40{
             $this->submitRowInfo();
         }
 
+        public function updateAuthContent(array $AuthContent) : void{
+            $OldAuthContent = $this->getAuthContent();
+            foreach($AuthContent as $SingleAuthKey => $SingleAuth){
+                $OldAuthContent[$SingleAuthKey] = $SingleAuth;
+            }
+            $this->setAuthContent($OldAuthContent);
+        }
+
         public function getAuthItem(string $itemName) : bool{
             $Auths = $this->getAuthContent();
             if(!empty($Auths[$itemName])){

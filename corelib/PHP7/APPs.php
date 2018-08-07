@@ -123,6 +123,13 @@ namespace OPENAPI40{
             $this->m_APPID['apppermission'] = gzcompress(json_encode($newPermission),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
+        public function updatePermissions(array $newPermission) : void{
+            $OldPermission = $this->getPermissions();
+            foreach($newPermission as $SinglePermissionKey => $SinglePermission){
+                $OldPermission[$SinglePermissionKey] = $SinglePermission;
+            }
+            $this->setPermissions($OldPermission);
+        }
         public function getPermission(string $permissionItem) : bool{
             $Permissions = $this->getPermissions();
             if(!empty($Permissions[$permissionItem])){
@@ -412,6 +419,10 @@ namespace OPENAPI40{
             }
             if(empty($DisplayName))
                 $DisplayName = $APPID;
+            if(self::checkExist($DisplayName)){
+                throw new Exception("Existence displayname");
+                return null;
+            }
             $NewAPPRow = array(
                 'appid' => $APPID,
                 'appdisplayname' => $DisplayName,

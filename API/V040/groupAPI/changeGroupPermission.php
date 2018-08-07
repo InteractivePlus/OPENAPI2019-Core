@@ -22,5 +22,5 @@ if(!OPENAPI40\UserGroup::checkExist($GroupName)){
     generalReturn(true,4,$Language);
 }
 $myUserGroup = new OPENAPI40\UserGroup($GroupName);
-$myUserGroup->setPermissions(json_decode($Permissions,true));
+$myUserGroup->updatePermissions(json_decode($Permissions,true));
 generalReturn(false,0,$Language);

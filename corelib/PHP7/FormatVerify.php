@@ -15,10 +15,10 @@ namespace OPENAPI40{
             }
             return preg_match("/^[a-zA-Z0-9]*$/", $C_user) ? true : false; //特殊字符检验
         }
-        public static function CheckUserName(string $Username) : bool{
+        public static function checkUserName(string $Username) : bool{
             return self::CheckUserValid($Username,$GLOBALS['OPENAPISettings']['User']['UsernameLength']['min'],$GLOBALS['OPENAPISettings']['User']['UsernameLength']['max']);
         }
-        public static function CheckEmailAddr(string $C_mailaddr) : bool{
+        public static function checkEmailAddr(string $C_mailaddr) : bool{
             return preg_match("/^[_a-zA-Z0-9\-]+(.[_a-zA-Z0-9\-]+)*@[_a-zA-Z0-9\-]+(\.[_a-zA-Z0-9\-]+)*$/", $C_mailaddr) ? true : false;
         }
         protected static function checkPasswordValid(string $C_Password, int $min_CharNum = 0, int $max_CharNum = -1) : bool{
@@ -30,6 +30,9 @@ namespace OPENAPI40{
         }
         public static function checkPassword(string $Password) : bool{
             return self::checkPasswordValid($Password,$GLOBALS['OPENAPISettings']['User']['PasswordLength']['min'],$GLOBALS['OPENAPISettings']['User']['PasswordLength']['max']);
+        }
+        public static function checkDisplayName(string $DisplayName) : bool{
+            return self::CheckLengthBetween($DisplayName,$GLOBALS['OPENAPISettings']['User']['DisplayNameLength']['min'],$GLOBALS['OPENAPISettings']['User']['DisplayNameLength']['max']);
         }
     }
 }

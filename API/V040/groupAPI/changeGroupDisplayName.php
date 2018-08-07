@@ -4,7 +4,7 @@ $manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $GroupName = $_POST['groupName'];
 $GroupDisplayName = $_POST['newGroupDisplayName'];
-if(empty($GroupDisplayName)){
+if(OPENAPI40\FormatVerify::checkDisplayName($GroupDisplayName)){
     generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($manageUsername)){

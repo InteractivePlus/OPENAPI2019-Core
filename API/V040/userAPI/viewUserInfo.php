@@ -16,11 +16,17 @@ if($manageUsername !== $Username){
     }
 }
 $myUser = new OPENAPI40\User($Username);
+$myAPPs = OPENAPI40\APP::getAPPsOfUser($Username);
+$appArray = array();
+foreach($myAPPs as &$singleAPP){
+    $appArray[] = $singleAPP->getAPPID();
+}
 $userInfoArray = array(
     'userDisplayName' => $myUser->getDisplayName(),
     'email' => $myUser->getEmail(),
     'settings' => json_encode($myUser->getSettings()),
     'thirdAuth' => json_encode($myUser->getThirdAuths()),
-    'userGroup' => json_encode($myUser->getUserGroup())
+    'userGroup' => json_encode($myUser->getUserGroup()),
+    'relatedApps' => $appArray
 );
 generalReturn(false,0,$Language,array('userInfo'=>$userInfoArray));

@@ -285,6 +285,14 @@ namespace OPENAPI40{
             $this->submitRowInfo();
         }
 
+        public function updatePermissions(array $newPermission) : void{
+            $OldPermission = $this->getPermissions();
+            foreach($newPermission as $SinglePermissionKey=>$SinglePermission){
+                $OldPermission[$SinglePermissionKey] = $SinglePermission;
+            }
+            $this->setPermissions($OldPermission);
+        }
+
         public function getPermission(string $permissionType) : bool{
             $PermissionJSON = $this->getPermissionJSON();
             $Permissions = json_decode($PermissionJSON,true);

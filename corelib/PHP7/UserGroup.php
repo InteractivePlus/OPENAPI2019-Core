@@ -54,10 +54,30 @@ namespace OPENAPI40{
             return $Permissions;
         }
 
-        public function setPermissions(array $newPermissions) : void{
-            $PermissionJSON = json_encode($newPermissions);
+        public function setPermissions(array $newPermission) : void{
+            foreach($newPermission as $SinglePermissionKey => &$SinglePermission){
+                $CanFind = false;
+                foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Permission'] as $PermField){
+                    if($PermField === $SinglePermissionKey){
+                        $CanFind = true;
+                        break;
+                    }
+                }
+                if(!$CanFind){
+                    unset($SinglePermission);
+                }
+            }
+            $PermissionJSON = json_encode($newPermission);
             $this->m_GroupRow['grouppermission'] = $PermissionJSON;
             $this->submitRowInfo();
+        }
+
+        public function updatePermissions(array $newPermission) : void{
+            $OldPermissions = $this->getPermissions();
+            foreach($newPermission as $SinglePermissionKey => $SinglePermission){
+                $OldPermissions[$SinglePermissionKey] = $SinglePermission;
+            }
+            $this->setPermissions($OldPermissions);
         }
 
         public function getPermission(string $permissionItem) : bool{

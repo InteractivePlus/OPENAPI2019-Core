@@ -30,7 +30,8 @@ $OPENAPISettings['Fieldnames']['Permission'] = array(
     'EditUsers',
     'ViewLogs',
     'ManageUserGroups',
-    'ChangeUserPermissions'
+    'ChangeUserPermissions',
+    'ModifyAPPIDs'
 );
 $OPENAPISettings['Fieldnames']['APPPermission'] = array(
     'accessInfo',
@@ -60,6 +61,11 @@ $OPENAPISettings['User']['UsernameLength'] = array(
     'min' => 6,
     'max' => 30
 );
+$OPENAPISettings['User']['DisplayNameLength'] = array(
+    'min' => 4,
+    'max' => 30
+);
+
 $OPENAPISettings['User']['defaultValues'] = array(
     'settings' => array(
         "subscribeToMail" => "true",
@@ -76,7 +82,8 @@ $OPENAPISettings['User']['defaultValues'] = array(
             "EditUsers": "false", 
             "ViewLogs": "false", 
             "ManageUserGroups": "false", 
-            "ChangeUserPermissions": "false"
+            "ChangeUserPermissions": "false",
+            "ModifyAPPIDs": "false"
         }',
         $OPENAPISettings['CompressIntensity']
     ),
@@ -95,7 +102,8 @@ $OPENAPISettings['UserGroup']['defaultValues'] = array(
             "EditUsers": "false",
             "ViewLogs": "false", 
             "ManageUserGroups": "false", 
-            "ChangeUserPermissions": "false"
+            "ChangeUserPermissions": "false",
+            "ModifyAPPIDs": "false"
         }',
         $OPENAPISettings['CompressIntensity']
     )

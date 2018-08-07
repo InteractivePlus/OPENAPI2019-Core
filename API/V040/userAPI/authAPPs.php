@@ -30,7 +30,7 @@ if(!$AuthRecordExist && !empty($Permissions)){
 if(empty($Permissions)){
     $myAuth->delete();
 }else{
-    $myAuth->setAuthContent(json_decode($Permissions,true));
+    $myAuth->updateAuthContent(json_decode($Permissions,true));
 }
 
 generalReturn(false,0,$Language);

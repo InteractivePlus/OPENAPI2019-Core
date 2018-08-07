@@ -18,5 +18,5 @@ if(!$manageUser->checkHasPermission('ChangeUserPermissions')){
     generalReturn(true,8,$Language);
 }
 $myUser = new OPENAPI40\User($Username);
-$myUser->setPermissions(json_decode($NewPermissions,true));
+$myUser->updatePermissions(json_decode($NewPermissions,true));
 generalReturn(false,0,$Language);

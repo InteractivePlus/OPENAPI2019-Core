@@ -6,7 +6,7 @@ $Email = $_POST['email'];
 $Settings = $_POST['settings'];
 $DisplayName = $_POST['displayName'];
 //Check if user, password and email fits with format requirements
-if(!OPENAPI40\FormatVerify::CheckUserName($Username) || !OPENAPI40\FormatVerify::checkPassword($Password) || !OPENAPI40\FOrmatVerify::CheckEmailAddr($Email)){
+if(!OPENAPI40\FormatVerify::checkUserName($Username) || !OPENAPI40\FormatVerify::checkPassword($Password) || !OPENAPI40\FormatVerify::checkEmailAddr($Email) || !OPENAPI40\FormatVerify::checkDisplayName($DisplayName)){
     generalReturn(true,7,$Language);
 }
 //Check if user, email and displayname exists.

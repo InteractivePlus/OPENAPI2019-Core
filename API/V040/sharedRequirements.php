@@ -1,6 +1,6 @@
 <?
-require_once __DIR__ . '../../extlibs/BoostPHP/autoload.php';
-require_once __DIR__ . '../../corelib/autoload.php';
+require_once __DIR__ . '/../../extlibs/BoostPHP/autoload.php';
+require_once __DIR__ . '/../../corelib/autoload.php';
 
 
 function returnJSON($Array) : void{
@@ -22,7 +22,7 @@ function generalReturn($isError, $ErrorCode, $Language = 'cn', $OtherParams = ar
 }
 
 $Language = $_POST['language'];
-if(strtolower($Language) === 'zh-cn' || strtolower($Language) === 'zh'){
+if(strtolower($Language) === 'zh-cn' || strtolower($Language) === 'zh' || strtolower($Language) === 'cn'){
     $Language = 'cn';
 }else if(strtolower($Language) === 'en'){
     $Language = 'en';
