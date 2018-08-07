@@ -2,17 +2,6 @@
 require_once __DIR__ . '../../extlibs/BoostPHP/autoload.php';
 require_once __DIR__ . '../../corelib/autoload.php';
 
-OPENAPI40\Internal::InitializeOPENAPI();
-
-$Language = $_POST['language'];
-if(strtolower($Language) === 'zh-cn' || strtolower($Language) === 'zh'){
-    $Language = 'cn';
-}else if(strtolower($Language) === 'en'){
-    $Language = 'en';
-}else{
-    $Language = 'x-default';
-}
-$IP = \BoostPHP\GeneralUtility::getUserIP();
 
 function returnJSON($Array) : void{
     OPENAPI40\Internal::DestroyOPENAPI();
@@ -30,4 +19,18 @@ function generalReturn($isError, $ErrorCode, $Language = 'cn', $OtherParams = ar
     }
     returnJSON($mArray);
     return;
+}
+
+$Language = $_POST['language'];
+if(strtolower($Language) === 'zh-cn' || strtolower($Language) === 'zh'){
+    $Language = 'cn';
+}else if(strtolower($Language) === 'en'){
+    $Language = 'en';
+}else{
+    $Language = 'x-default';
+}
+$IP = \BoostPHP\GeneralUtility::getUserIP();
+$APIInitState = OPENAPI40\Internal::InitializeOPENAPI();
+if(!$APIInitState){
+    generalReturn(true,500,$Language);
 }

@@ -418,7 +418,7 @@ namespace OPENAPI40{
             }
         }
 
-        public static function getUsersByNickName(string $NickName) : User{
+        public static function getUserByNickName(string $NickName) : User{
             $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('userdisplayname'=>$NickName));
             if($NickNameDataRow['count'] < 1){
                 throw new Exception('Non-existence user');
@@ -426,6 +426,19 @@ namespace OPENAPI40{
             }
             $RelatedUsername = $NickNameDataRow['result'][0]['username'];
             return new User($RelatedUsername);
+        }
+
+        public static function getUsersByGroup(string $GroupName) : array{
+            $GroupDataRows = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('usergroup'=>$GroupName));
+            if($GroupDataRows['count'] < 1){
+                return array();
+            }
+            $RstArray = array();
+            foreach($GroupDataRows['result'] as &$GroupDataRow){
+                $RelatedUsername = $GroupDataRow['username'];
+                $RstArray[] = new User($RelatedUsername);
+            }
+            return $RstArray;
         }
 
         public static function getUserByEmail(string $Email) : User{
