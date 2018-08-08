@@ -1,6 +1,7 @@
 <?php
 namespace OPENAPI40\PluginAutoload{
     require_once __DIR__ . '/autoload_config.php';
+    require_once __DIR__ . '/pluginInstallAutoLoad.php'; //自动安装最新添加的Plugin
     if (!defined('PHP_VERSION_ID')) {
         $version = explode('.', PHP_VERSION);
         define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
