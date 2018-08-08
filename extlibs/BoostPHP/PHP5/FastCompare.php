@@ -19,7 +19,7 @@ namespace BoostPHP{
          * @param array $array array to be sorted
          * @return void
          */
-        public static function customCompareSort(&$array, $functionName): void{
+        public static function customCompareSort(&$array, $functionName){
             usort($array, $functionName);
             return;
         }
