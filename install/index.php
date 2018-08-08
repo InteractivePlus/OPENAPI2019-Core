@@ -28,23 +28,12 @@ foreach($ReplaceValues as $SingleUserDefField => $SingleUserDefVal){
 }
 file_put_contents(__DIR__ . '/../settings.php',$settingFile);
 require_once __DIR__ . '/../corelib/autoload.php';
+require_once __DIR__ . '/uninstall.php'; //uninstall first
 $initState = OPENAPI40\Internal::InitializeOPENAPI();
 if(!$initState){
     generalReturn(true,'连接数据库失败!');
 }
-\BoostPHP\MySQL::querySQL(
-    \OPENAPI40\Internal::$MySQLiConn,
-    'DROP TABLE IF EXISTS 
-        `users`,
-        `usergroups`,
-        `tokens`,
-        `apptokens`,
-        `verificationcodes`,
-        `log`,
-        `userauth`,
-        `apps`
-    ;'
-);
+
 \BoostPHP\MySQL::querySQL(
     \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `users`(
@@ -137,5 +126,8 @@ if(!$initState){
 
 $normalGroup = OPENAPI40\UserGroup::createGroup("normalUsers","Normal_Users",array());
 file_put_contents(__DIR__ . '/install.lock','OPENAPI-Locked');
+
+require_once __DIR__ . '/../plugins/pluginInstallAutoLoad.php'; //安装所有插件
+
 OPENAPI40\Internal::DestroyOPENAPI();
 generalReturn(false,"No error","cn");

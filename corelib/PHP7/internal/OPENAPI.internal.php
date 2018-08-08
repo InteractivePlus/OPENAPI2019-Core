@@ -5,8 +5,7 @@ namespace OPENAPI40{
     class Internal{
         public static $MySQLiConn;
         public static function InitializeOPENAPI() : bool{
-            global $OPENAPISettings;
-            self::$MySQLiConn = \BoostPHP\MySQL::connectDB($OPENAPISettings['MySQL']['Username'],$OPENAPISettings['MySQL']['Password'],$OPENAPISettings['MySQL']['Database'],$OPENAPISettings['MySQL']['Host'],$OPENAPISettings['MySQL']['Port']);
+            self::$MySQLiConn = \BoostPHP\MySQL::connectDB($GLOBALS['OPENAPISettings']['MySQL']['Username'],$GLOBALS['OPENAPISettings']['MySQL']['Password'],$GLOBALS['OPENAPISettings']['MySQL']['Database'],$GLOBALS['OPENAPISettings']['MySQL']['Host'],$GLOBALS['OPENAPISettings']['MySQL']['Port']);
             if(!self::$MySQLiConn){
                 return false;
             }
