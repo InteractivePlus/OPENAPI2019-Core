@@ -7,13 +7,13 @@ namespace OPENAPI40{
         }
         public static function deleteLogs(int $LogLevel = -1, string $LogContent = '', int $LogTime = -1) : void{
             $SelectRequirement = array();
-            if($LogLevel !== -1){
+            if($LogLevel > 0){
                 $SelectRequirement['loglevel'] = $LogLevel;
             }
             if(!empty($LogContent)){
                 $SelectRequirement['logcontent'] = gzcompress($LogContent,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             }
-            if($LogTime !== -1){
+            if($LogTime >= 0){
                 $SelectRequirement['logtime'] = $LogTime;
             }
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'log',$SelectRequirement);
@@ -25,7 +25,7 @@ namespace OPENAPI40{
             $MySQLStatement = 'DELETE FROM log WHERE loglevel<='. $GLOBALS['OPENAPISettings']['LightLogLevel'] . ' AND logtime<=' . (time() - $GLOBALS['OPENAPISettings']['LightLogAvailableTime']);
             \BoostPHP\MySQL::querySQL(Internal::$MySQLiConn,$MySQLStatement);
         }
-        public static function listAllLogs(int $minimumLogLevel = 0) : array{
+        public static function listAllLogs(int $minimumLogLevel = 1) : array{
             $MySQLStatement = 'SELECT * FROM log WHERE loglevel>=' . $minimumLogLevel;
             $DataRow = \BoostPHP\MySQL::selectIntoArray_FromStatement(Internal::$MySQLiConn,$MySQLStatement);
             if($DataRow['count']<1){
