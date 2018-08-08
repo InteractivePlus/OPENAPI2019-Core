@@ -1,2 +1,2 @@
 <?
-require_once __DIR__ . '/../pluginInstallShared.php';
+require_once __DIR__ . '/../pluginUnInstallShared.php';
