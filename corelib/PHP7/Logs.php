@@ -11,7 +11,7 @@ namespace OPENAPI40{
                 $SelectRequirement['loglevel'] = $LogLevel;
             }
             if(!empty($LogContent)){
-                $SelectRequirement['logcontent'] = $LogContent;
+                $SelectRequirement['logcontent'] = gzcompress($LogContent,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             }
             if($LogTime !== -1){
                 $SelectRequirement['logtime'] = $LogTime;
