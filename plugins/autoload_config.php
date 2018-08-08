@@ -11,7 +11,7 @@ namespace OPENAPI40\PluginAutoload{
 		while($file = readdir($dh) !== false){
 			if($file != "." && $file != ".."){
 				$filePath = __DIR__ . '/' . $file;
-				if(is_dir($filePath)){
+				if(is_dir($filePath) && strpos($file,'_') !== 0){
 					Internal::$RequiredPlugins[] = $file;
 				}
 			}
