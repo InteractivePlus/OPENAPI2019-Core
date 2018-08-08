@@ -17,7 +17,7 @@ namespace OPENAPI40{
         protected function updateRowInfo() : void{
             $mDataArray = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'apps', array('appid'=>$this->m_APPID));
             if($mDataArray['count']<1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $this->m_APPRow = $mDataArray['result'][0];
@@ -28,7 +28,7 @@ namespace OPENAPI40{
         }
         public function __construct(string $APPID){
             if(!self::checkExist($APPID)){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $this->m_APPID = $APPID;
@@ -175,7 +175,7 @@ namespace OPENAPI40{
             //Check if user exists first.
             $UserRowCount = \BoostPHP\MySQL::checkExist(Internal::$MySQLiConn, 'users', array('username'=>$Username));
             if($UserRowCount < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $OriginalUser = $this->getManageUsers();
@@ -223,7 +223,7 @@ namespace OPENAPI40{
         public function addPendingUser(string $Username) : void{
             $UserRowCount = \BoostPHP\MySQL::checkExist(Internal::$MySQLiConn, 'users', array('username'=>$Username));
             if($UserRowCount < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $OriginalUser = $this->getPendingUsers();
@@ -338,6 +338,9 @@ namespace OPENAPI40{
                 if(!$GLOBALS['OPENAPISettings']['APPTokenAvailableAfterIPChange'])
                     return false;
             }
+            if($Token !== $mTokenRow['token']){
+                return false;
+            }
             if($GLOBALS['OPENAPISettings']['RenewAPPTokenWhenChecking']){
                 $this->renewRelatedToken($Username);
             }
@@ -396,7 +399,7 @@ namespace OPENAPI40{
         public static function getAPPsOfUser(string $Username) : array{
             $UserDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('username'=>$Username));
             if($UserDataRow['count'] < 1){
-                throw new Exception("Non-existence user");
+                throw new \Exception("Non-existence user");
                 return array();
             }
             $SingleUserRow = &$UserDataRow['result'][0];
@@ -433,7 +436,7 @@ namespace OPENAPI40{
         public static function getAPPByDisplayName(string $DisplayName) : APP{
             $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'apps', array('appdisplayname'=>$DisplayName));
             if($NickNameDataRow['count'] < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return null;
             }
             $RelatedAPP = $NickNameDataRow['result'][0]['appid'];
@@ -441,13 +444,13 @@ namespace OPENAPI40{
         }
         public static function registerAPP(string $APPID, string $APPPass, string $adminUser, string $DisplayName = '') : APP{
             if(self::checkExist($APPID)){
-                throw new Exception("Existence user");
+                throw new \Exception("Existence user");
                 return null;
             }
             if(empty($DisplayName))
                 $DisplayName = $APPID;
             if(self::checkExist($DisplayName)){
-                throw new Exception("Existence displayname");
+                throw new \Exception("Existence displayname");
                 return null;
             }
             $NewAPPRow = array(

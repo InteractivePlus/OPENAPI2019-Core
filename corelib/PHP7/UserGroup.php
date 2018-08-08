@@ -11,7 +11,7 @@ namespace OPENAPI40{
         protected function updateRowInfo() : void{
             $mDataArray = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'usergroups', array('groupname'=>$this->m_GroupName));
             if($mDataArray['count']<1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $this->m_GroupRow = $mDataArray['result'][0];
@@ -22,7 +22,7 @@ namespace OPENAPI40{
         }
         public function __construct(string $GroupName){
             if(!self::checkExist($GroupName)){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $this->m_GroupName = $GroupName;
@@ -68,7 +68,7 @@ namespace OPENAPI40{
                 }
             }
             $PermissionJSON = json_encode($newPermission);
-            $this->m_GroupRow['grouppermission'] = $PermissionJSON;
+            $this->m_GroupRow['grouppermission'] = gzcompress($PermissionJSON,$GLOABLS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
@@ -120,7 +120,7 @@ namespace OPENAPI40{
         public static function getGroupByDisplayName(string $groupName) : bool{
             $mData = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn,'usergroups',array('groupdisplayname'=>$displayName));
             if($mData['count'] < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return null;
             }
             $mGroupRow = $mData['result'][0];
@@ -130,7 +130,7 @@ namespace OPENAPI40{
         public static function getGroupByUser(string $Username) : UserGroup{
             $mUserRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('username'=>$Username));
             if($mUserRow['count'] < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return null;
             }else{
                 return new UserGroup($mUserRow['result'][0]['usergroup']);
@@ -150,12 +150,12 @@ namespace OPENAPI40{
             }
             return $groupRst;
         }
-        public static function createGroup(string $groupID, string $displayName, array $Permission) : UserGroup{
+        public static function createGroup(string $groupID, string $displayName, array $Permission = array()) : UserGroup{
             if(self::checkExist($groupID)){
-                throw new Exception('Existence user');
+                throw new \Exception('Existence user');
                 return null;
             }else if(self::checkExist($displayName)){
-                throw new Exception('Existence displayname');
+                throw new \Exception('Existence displayname');
                 return null;
             }
 
@@ -165,7 +165,9 @@ namespace OPENAPI40{
                 'grouppermission' => $GLOBALS['OPENAPISettings']['UserGroup']['defaultValues']['grouppermission']
             );
             \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'usergroups',$insertingArray);
-            return new UserGroup($groupID);
+            $mGroup = new UserGroup($groupID);
+            $mGroup->updatePermissions($Permission);
+            return $mGroup;
         }
     }
 }

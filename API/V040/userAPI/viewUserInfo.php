@@ -24,9 +24,9 @@ foreach($myAPPs as &$singleAPP){
 $userInfoArray = array(
     'userDisplayName' => $myUser->getDisplayName(),
     'email' => $myUser->getEmail(),
-    'settings' => json_encode($myUser->getSettings()),
-    'thirdAuth' => json_encode($myUser->getThirdAuths()),
-    'userGroup' => json_encode($myUser->getUserGroup()),
+    'settings' => $myUser->getSettings(),
+    'thirdAuth' => $myUser->getThirdAuths(),
+    'userGroup' => $myUser->getUserGroup(),
     'relatedApps' => $appArray
 );
 generalReturn(false,0,$Language,array('userInfo'=>$userInfoArray));

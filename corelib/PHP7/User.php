@@ -24,7 +24,7 @@ namespace OPENAPI40{
         protected function updateRowInfo() : void{
             $mDataArray = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('username'=>$this->m_Username));
             if($mDataArray['count']<1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $this->m_UserRow = $mDataArray['result'][0];
@@ -36,7 +36,7 @@ namespace OPENAPI40{
         }
         public function __construct(string $Username){
             if(!self::checkExist($Username)){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return;
             }
             $this->m_Username = $Username;
@@ -101,6 +101,9 @@ namespace OPENAPI40{
             if($UserIP !== $mTokenRow['tokenip']){
                 if(!$GLOBALS['OPENAPISettings']['TokenAvailableAfterIPChange'])
                     return false;
+            }
+            if($Token !== $mTokenRow['token']){
+                return false;
             }
             if($GLOBALS['OPENAPISettings']['RenewTokenWhenChecking']){
                 $this->renewRelatedToken();
@@ -212,6 +215,14 @@ namespace OPENAPI40{
             }
             $this->m_UserRow['settings'] = gzcompress(json_encode($newSettings),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
+        }
+
+        public function updateSettings(array $newSettings) : void{
+            $OldSettings = $this->getSettings();
+            foreach($newSettings as $newKey => $newVal){
+                $OldSettings[$newKey] = $newVal;
+            }
+            $this->setSettings($OldSettings);
         }
 
         public function getSetting(string $settingItem){
@@ -429,7 +440,7 @@ namespace OPENAPI40{
         public static function getUserByNickName(string $NickName) : User{
             $NickNameDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('userdisplayname'=>$NickName));
             if($NickNameDataRow['count'] < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return null;
             }
             $RelatedUsername = $NickNameDataRow['result'][0]['username'];
@@ -452,7 +463,7 @@ namespace OPENAPI40{
         public static function getUserByEmail(string $Email) : User{
             $EmailDataRow = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'users', array('email'=>$Email));
             if($EmailDataRow['count'] < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return null;
             }
             $RelatedUsername = $EmailDataRow['result'][0]['username'];
@@ -482,7 +493,7 @@ namespace OPENAPI40{
         }
 
         public static function generateToken(string $Username) : string{
-            return md5(\BoostPHP\BoostPHP\Encryption\SHA::SHA256Encode($Username . rand(0,10000) . time(),$GLOBALS['OPENAPISettings']['Salt']));
+            return md5(\BoostPHP\Encryption\SHA::SHA256Encode($Username . rand(0,10000) . time(),$GLOBALS['OPENAPISettings']['Salt']));
         }
 
         public static function generateVeriCode(string $Username) : string{
@@ -500,15 +511,15 @@ namespace OPENAPI40{
             }
 
             if(self::checkExist($Username)){
-                throw new Exception('Existence user');
+                throw new \Exception('Existence user');
                 return null;
             }
             if(self::checkEmailExist($Email)){
-                throw new Exception('Existence email');
+                throw new \Exception('Existence email');
                 return null;
             }
             if(self::checkNickNameExist($NickName)){
-                throw new Exception('Existence displayname');
+                throw new \Exception('Existence displayname');
                 return null;
             }
 

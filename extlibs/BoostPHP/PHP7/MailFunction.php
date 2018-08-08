@@ -21,7 +21,7 @@ namespace BoostPHP{
 		 * @return bool Successful?
 		 */
 		public static function sendMail(int $SMTPPort = 25,string $SMTPHost,string $SMTPUsername,string $SMTPPassword,string $To,string $Subject,string $Body,string $Sender,string $SenderName, string $SecureConnection = 'ssl') : bool{
-			$MySD=new PHPMailer;
+			$MySD=new \PHPMailer;
 			$MySD->IsSMTP();
 			$MySD->isHTML(true);
 			$MySD->CharSet = 'utf-8';

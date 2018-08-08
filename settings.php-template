@@ -1,6 +1,6 @@
 <?php
 $OPENAPISettings['MySQL'] = array(
-    'Host' => '`MYSQLHost`',
+    'Host' => '`MySQLHost`',
     'Port' => `MySQLPort`,
     'Username' => '`MySQLUsername`',
     'Password' => '`MySQLPassword`',

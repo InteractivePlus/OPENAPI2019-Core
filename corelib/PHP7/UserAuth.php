@@ -13,7 +13,7 @@ namespace OPENAPI40{
         protected function updateRowInfo() : void{
             $mDataArray = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'userauth', array('username'=>$this->m_Username, 'appid'=>$this->m_APPID));
             if($mDataArray['count']<1){
-                throw new Exception('Non-existence data');
+                throw new \Exception('Non-existence data');
                 return;
             }
             $this->m_AuthRow = $mDataArray['result'][0];
@@ -24,7 +24,7 @@ namespace OPENAPI40{
         }
         public function __construct(string $Username, string $APPID){
             if(!self::checkExist($Username, $APPID)){
-                throw new Exception('Non-existence data');
+                throw new \Exception('Non-existence data');
                 return;
             }
             $this->m_Username = $Username;
@@ -134,16 +134,16 @@ namespace OPENAPI40{
         public static function createAuthContent(string $Username, string $APPID, array $AuthContent = array()) : UserAuth{
             $userCount = \BoostPHP\MySQL::checkExist(Internal::$MySQLiConn,'users',array('username'=>$Username));
             if($userCount < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return null;
             }
             $APPCount = \BoostPHP\MySQL::checkExist(Internal::$MySQLiConn, 'apps', array('apppid'=>$APPID));
             if($APPCount < 1){
-                throw new Exception('Non-existence user');
+                throw new \Exception('Non-existence user');
                 return null;
             }
             if(self::checkExist($Username,$APPID)){
-                throw new Exception('Existence user');
+                throw new \Exception('Existence user');
                 return null;
             }
             foreach($GLOBALS['OPENAPISettings']['UserAuth']['defaultValues'] as $defaultKey => &$defaultVal){

@@ -8,7 +8,7 @@ $NewSettings = $_POST['newSettings'];
 if(empty($NewSettings)){
     generalReturn(true,7,$Language);
 }
-if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI\User::checkExist($Username)){
+if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }
 $manageUser = new OPENAPI40\User($manageUsername);
@@ -24,9 +24,5 @@ if($manageUsername !== $Username){
 $myUser = new OPENAPI40\User($Username);
 
 $newSettingArray = json_decode($NewSettings,true);
-$newOverSettings = json_decode($myUser->getSettingsJSON(),true);
-foreach($newSettingArray as $newSetKey => &$newSetSinVal){
-    $newOverSettings[$newSetKey] = $newSetSinVal;
-}
-$myUser->setsettings($newOverSettings);
+$myUser->updateSettings($newSettingArray);
 generalReturn(false,0,$Language);

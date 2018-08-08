@@ -3,7 +3,7 @@ require_once __DIR__ . '/installRequirements.php';
 if(file_exists(__DIR__ . '/install.lock')){
     generalReturn(true,"install.lock已被锁定, 请删除/install/install.lock后重新安装");
 }
-$RepalceValues = array(
+$ReplaceValues = array(
     'MySQLHost' => $_POST['MySQLHost'],
     'MySQLPort' => $_POST['MySQLPort'],
     'MySQLUsername' => $_POST['MySQLUsername'],
@@ -27,24 +27,26 @@ foreach($ReplaceValues as $SingleUserDefField => $SingleUserDefVal){
     $settingFile = str_replace('`' . $SingleUserDefField . '`',$SingleUserDefVal,$settingFile);
 }
 file_put_contents(__DIR__ . '/../settings.php',$settingFile);
-require_once __DIR__ . '../corelib/autoload.php';
+require_once __DIR__ . '/../corelib/autoload.php';
 $initState = OPENAPI40\Internal::InitializeOPENAPI();
 if(!$initState){
     generalReturn(true,'连接数据库失败!');
 }
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
-    'DROP TABLE users;
-    DROP TABLE usergroups;
-    DROP TABLE tokens;
-    DROP TABLE apptokens;
-    DROP TABLE verificationcodes;
-    DROP TABLE log;
-    DROP TABLE userauth;
-    DROP TABLE apps'
+    \OPENAPI40\Internal::$MySQLiConn,
+    'DROP TABLE IF EXISTS 
+        `users`,
+        `usergroups`,
+        `tokens`,
+        `apptokens`,
+        `verificationcodes`,
+        `log`,
+        `userauth`,
+        `apps`
+    ;'
 );
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `users`(
         `username` VARCHAR(' . $OPENAPISettings['User']['UsernameLength']['max'] . '),
         `userdisplayname` VARCHAR(' . $OPENAPISettings['User']['DisplayNameLength']['max'] . '),
@@ -61,7 +63,7 @@ if(!$initState){
     )ENGINE=InnoDB DEFAULT CHARSET=utf8;'
 );
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `usergroups`(
         `groupname` VARCHAR(' . $OPENAPISettings['User']['UsernameLength']['max'] . '),
         `groupdisplayname` VARCHAR(' . $OPENAPISettings['User']['DisplayNameLength']['max'] . '),
@@ -70,7 +72,7 @@ if(!$initState){
 );
 
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `tokens`(
         `token` CHAR(32),
         `starttime` INT,
@@ -80,7 +82,7 @@ if(!$initState){
 );
 
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `apptokens`(
         `token` CHAR(32),
         `starttime` INT,
@@ -91,7 +93,7 @@ if(!$initState){
 );
 
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `verificationcodes`(
         `actiontype` INT,
         `vericode` CHAR(32),
@@ -101,7 +103,7 @@ if(!$initState){
 );
 
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `log`(
         `logtime` INT,
         `logcontent` TEXT,
@@ -110,7 +112,7 @@ if(!$initState){
 );
 
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `userauth`(
         `username` VARCHAR(' . $OPENAPISettings['User']['UsernameLength']['max'] . '),
         `authcontent` TEXT,
@@ -119,7 +121,7 @@ if(!$initState){
 );
 
 \BoostPHP\MySQL::querySQL(
-    OPENAPI40\Internal::$MySQLiConn,
+    \OPENAPI40\Internal::$MySQLiConn,
     'CREATE TABLE `apps`(
         `appid` VARCHAR(' . $OPENAPISettings['User']['UsernameLength']['max'] . '),
         `appdisplayname` VARCHAR(' . $OPENAPISettings['User']['DisplayNameLength']['max'] . ')
@@ -133,7 +135,7 @@ if(!$initState){
     )ENGINE=InnoDB DEFAULT CHARSET=utf8;'
 );
 
-$normalGroup = OPENAPI40\UserGroup::createGroup("normalUsers","Normal_Users");
+$normalGroup = OPENAPI40\UserGroup::createGroup("normalUsers","Normal_Users",array());
 file_put_contents(__DIR__ . '/install.lock','OPENAPI-Locked');
 OPENAPI40\Internal::DestroyOPENAPI();
 generalReturn(false,"No error","cn");
