@@ -5,7 +5,7 @@ $Token = $_POST['token'];
 $APPID = $_POST['appID'];
 $newPermission = $_POST['newPermission'];
 
-if(empty($APPID) || empty($newPermission)){
+if(empty($manageUsername) || empty($Token) || empty($APPID) || empty($newPermission)){
     generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($manageUsername)){

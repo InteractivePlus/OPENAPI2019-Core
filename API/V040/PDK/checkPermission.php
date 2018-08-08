@@ -5,6 +5,9 @@ $appToken = $_POST['appToken'];
 $APPID = $_POST['appID'];
 $APPPass = $_POST['appPass'];
 
+if(empty($Username) || empty($appToken) || empty($APPID) || empty($APPPass)){
+    generalReturn(true,7,$Language);
+}
 if(!OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

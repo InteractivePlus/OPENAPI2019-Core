@@ -6,9 +6,11 @@ $Username = $_POST['creatingUserName'];
 $APPID = $_POST['appID'];
 $APPPass = $_POST['appPass'];
 $APPDisplayName = $_POST['appDisplayName'];
-if(empty($APPID) || empty($APPPass) || empty($APPDisplayName)){
+
+if(empty($manageUsername) || empty($Token) || empty($Username) || empty($APPID) || empty($APPPass) || empty($APPDisplayName)){
     generalReturn(true,7,$Language);
-}else if(!OPENAPI40\FormatVerify::checkUserName($APPID) || !OPENAPI40\FormatVerify::checkPassword($APPPass) || !OPENAPI40\FormatVerify::checkDisplayName($APPDisplayName)){
+}
+if(!OPENAPI40\FormatVerify::checkUserName($APPID) || !OPENAPI40\FormatVerify::checkPassword($APPPass) || !OPENAPI40\FormatVerify::checkDisplayName($APPDisplayName)){
     generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){

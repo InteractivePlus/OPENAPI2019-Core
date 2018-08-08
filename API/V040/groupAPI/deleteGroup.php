@@ -5,8 +5,14 @@ $Token = $_POST['token'];
 $GroupName = $_POST['groupName'];
 $NewGroupName = $_POST['newGroupName'];
 
+if(empty($manageUsername) || empty($Token) || empty($GroupName)){
+    generalReturn(true,7,$Language);
+}
 if(empty($NewGroupName)){
     $NewGroupName = 'normalUsers';
+}
+if($GroupName === 'normalUsers'){
+    generalReturn(true,8,$Language);
 }
 if(!OPENAPI40\User::checkExist($manageUsername)){
     generalReturn(true,2,$Language);

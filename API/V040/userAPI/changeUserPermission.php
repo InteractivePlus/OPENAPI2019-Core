@@ -4,7 +4,7 @@ $manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $Username = $_POST['changingUserName'];
 $NewPermissions = $_POST['newPermission'];
-if(empty($NewPermissions)){
+if(empty($manageUsername) || empty($Token) || empty($Username) || empty($NewPermissions)){
     generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){

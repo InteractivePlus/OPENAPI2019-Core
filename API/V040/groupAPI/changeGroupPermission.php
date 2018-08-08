@@ -5,8 +5,8 @@ $Token = $_POST['token'];
 $GroupName = $_POST['groupName'];
 $Permissions = $_POST['newPermission'];
 
-if(empty($Permissions)){
-    generalReturn(false,0,$Language);
+if(empty($manageUsername) || empty($Token) || empty($GroupName) || empty($Permissions)){
+    generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($manageUsername)){
     generalReturn(true,2,$Language);

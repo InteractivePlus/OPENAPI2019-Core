@@ -5,9 +5,10 @@ $Token = $_POST['token'];
 $APPID = $_POST['appID'];
 $VeriCode = $_POST['veriCode'];
 
-if(empty($APPID)){
+if(empty($manageUsername) || empty($Token) || empty($APPID)){
     generalReturn(true,7,$Language);
 }
+
 if(!OPENAPI40\User::checkExist($manageUsername)){
     generalReturn(true,2,$Language);
 }
@@ -25,6 +26,9 @@ if(!$isOwner){
         generalReturn(true,8,$Language);
     }
 }else{
+    if(empty($VeriCode)){
+        generalReturn(true,7,$Language);
+    }
     if(!$manageUser->checkVeriCode($VeriCode,4)){
         generalReturn(true,1,$Language);
     }

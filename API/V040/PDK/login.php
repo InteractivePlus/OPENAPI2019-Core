@@ -5,6 +5,12 @@ $Token = $_POST['token'];
 $APPID = $_POST['appID'];
 $APPIP = $_POST['appIP'];
 
+if(empty($Username) || empty($Token) || empty($APPID)){
+    generalReturn(true,7,$Language);
+}
+if(empty($APPIP)){
+    $APPIP = '';
+}
 if(!OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

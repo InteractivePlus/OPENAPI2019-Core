@@ -5,6 +5,9 @@ $Token = $_POST['token'];
 $APPID = $_POST['appID'];
 $Username = $_POST['searchUser'];
 
+if(empty($manageUsername) || empty($Token)){
+    generalReturn(true,7,$Language);
+}
 if(!OPENAPI40\User::checkExist($manageUsername)){
     generalReturn(true,2,$Language);
 }

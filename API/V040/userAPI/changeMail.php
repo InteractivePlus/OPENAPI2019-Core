@@ -6,6 +6,14 @@ $Username = $_POST['changingUserName'];
 $NewMail = $_POST['newMail'];
 $VeriCode = $_POST['veriCode'];
 
+if(empty($manageUsername) || empty($Token) || empty($Username) || empty($newMail)){
+    generalReturn(true,7,$Language);
+}
+
+if($manageUsername === $Username && empty($VeriCode)){
+    generalReturn(true,7,$Language);
+}
+
 if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

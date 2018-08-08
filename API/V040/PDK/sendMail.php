@@ -7,6 +7,9 @@ $APPPass = $_POST['appPass'];
 $mailTitle = $POST['mailTitle'];
 $mailBody = $POST['mailBody'];
 
+if(empty($Username) || empty($appToken) || empty($APPID) || empty($APPPass) || empty($mailTitle) || empty($mailBody)){
+    generalReturn(true,7,$Language);
+}
 if(!OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

@@ -5,6 +5,10 @@ $Password = $_POST['password'];
 $Email = $_POST['email'];
 $Settings = $_POST['settings'];
 $DisplayName = $_POST['displayName'];
+
+if(empty($Username) || empty($Password) || empty($Email) || empty($DisplayName)){
+    generalReturn(true,7,$Language);
+}
 //Check if user, password and email fits with format requirements
 if(!OPENAPI40\FormatVerify::checkUserName($Username) || !OPENAPI40\FormatVerify::checkPassword($Password) || !OPENAPI40\FormatVerify::checkEmailAddr($Email) || !OPENAPI40\FormatVerify::checkDisplayName($DisplayName)){
     generalReturn(true,7,$Language);

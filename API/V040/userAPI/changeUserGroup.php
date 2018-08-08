@@ -4,9 +4,10 @@ $manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $Username = $_POST['changingUserName'];
 $NewGroup = $_POST['newGroup'];
-if(empty($NewPermissions)){
+if(empty($manageUsername) || empty($Token) || empty($Username) || empty($NewGroup)){
     generalReturn(true,7,$Language);
 }
+
 if(!OPENAPI40\UserGroup::checkExist($NewGroup)){
     generalReturn(true,4,$Language);
 }

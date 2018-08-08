@@ -2,6 +2,9 @@
 require_once __DIR__ . '/../sharedRequirements.php';
 $Username = $_POST['userName'];
 $Token = $_POST['token'];
+if(empty($Username) || empty($Token)){
+    generalReturn(true,7,$Language);
+}
 if(!OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

@@ -4,6 +4,9 @@ $manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $GroupName = $_POST['groupName'];
 $GroupDisplayName = $_POST['newGroupDisplayName'];
+if(empty($manageUsername) || empty($Token) || empty($GroupName) || empty($GroupDisplayName)){
+    generalReturn(true,7,$Language);
+}
 if(OPENAPI40\FormatVerify::checkDisplayName($GroupDisplayName)){
     generalReturn(true,7,$Language);
 }

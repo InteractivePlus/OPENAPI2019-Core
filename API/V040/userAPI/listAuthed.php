@@ -3,6 +3,10 @@ require_once __DIR__ . '/../sharedRequirements.php';
 $manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $Username = $_POST['authingUserName'];
+
+if(empty($manageUsername) || empty($Token) || empty($Username)){
+    generalReturn(true,7,$Language);
+}
 if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

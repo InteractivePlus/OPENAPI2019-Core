@@ -5,6 +5,10 @@ $Token = $_POST['token'];
 $Username = $_POST['changingUserName'];
 $newDisplayName = $_POST['newDisplayName'];
 
+if(empty($manageUsername) || empty($Token) || empty($Username) || empty($newDisplayName)){
+    generalReturn(true,7,$Language);
+}
+
 if(!OPENAPI40\FormatVerify::checkDisplayName($newDisplayName)){
     generalReturn(true,7,$Language);
 }

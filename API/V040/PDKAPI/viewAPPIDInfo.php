@@ -5,7 +5,7 @@ $Token = $_POST['token'];
 $APPID = $_POST['appID'];
 
 $showDetailedInfo = false;
-if(empty($APPID)){
+if(empty($Username) || empty($Token) || empty($APPID)){
     generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($Username)){

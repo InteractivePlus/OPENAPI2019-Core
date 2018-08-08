@@ -3,7 +3,7 @@ require_once __DIR__ . '/../sharedRequirements.php';
 $Username = $_POST['userName'];
 $Token = $_POST['token'];
 $Action = $_POST['action'];
-if(empty($Action)){
+if(empty($Username) || empty($Token) || empty($Action)){
     generalReturn(true,7,$Language);
 }
 $ActionID = inval($Action);

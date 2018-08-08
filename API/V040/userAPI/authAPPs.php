@@ -5,6 +5,10 @@ $Token = $_POST['token'];
 $Username = $_POST['authingUserName'];
 $APPID = $_POST['authingAPPID'];
 $Permissions = $_POST['permissions'];
+if(empty($manageUsername) || empty($Token) || empty($Username) || empty($APPID)){
+    generalReturn(true,7,$Language);
+}
+
 if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

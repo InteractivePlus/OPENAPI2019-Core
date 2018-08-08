@@ -5,7 +5,7 @@ $Token = $_POST['token'];
 $APPID = $_POST['appID'];
 $Username = $_POST['newManager'];
 
-if(empty($APPID)){
+if(empty($manageUsername) || empty($Token) || empty($APPID) || empty($Username)){
     generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($Username) || !OPENAPI40\User::checkExist($manageUsername)){

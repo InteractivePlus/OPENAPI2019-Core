@@ -5,6 +5,13 @@ $Token = $_POST['token'];
 $Username = $_POST['deletingUserName'];
 $VeriCode = $_POST['verificationCode'];
 
+if(empty($manageUsername) || empty($Token) || empty($Username)){
+    generalReturn(true,7,$Language);
+}
+if($mangaeUsername === $Username && empty($VeriCode)){
+    generalReturn(true,7,$Language);
+}
+
 if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }

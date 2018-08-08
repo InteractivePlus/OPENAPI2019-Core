@@ -2,6 +2,9 @@
 require_once __DIR__ . '/../sharedRequirements.php';
 $Username = $_POST['userName'];
 $Password = $_POST['password'];
+if(empty($Username) || empty($Password)){
+    generalReturn(true,7,$Language);
+}
 //Check user exist first.
 if(!OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
