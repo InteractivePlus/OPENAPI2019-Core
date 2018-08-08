@@ -19,6 +19,7 @@ namespace OPENAPI40\PluginAutoload{
         $SourceBaseDir = "/PHP7/";
     }
     foreach (Internal::$RequiredPlugins as $SourcePlug){
-        require_once(__DIR__ . '/' . $SourcePlug . $SourceBaseDir . $SourcePlug . '.php');
+        $SourcePath = __DIR__ . '/' . $SourcePlug . $SourceBaseDir . $SourcePlug . '.php'; 
+        require_once($SourcePath);
     }
 }
