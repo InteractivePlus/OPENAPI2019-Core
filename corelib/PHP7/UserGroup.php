@@ -1,6 +1,7 @@
 <?php
 namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
+    require_once __DIR__ . '/Logs.php';
     class UserGroup{
         protected $m_GroupName = '';
         protected $m_GroupRow = array(
@@ -8,6 +9,7 @@ namespace OPENAPI40{
             'groupdisplayname' => '',
             'grouppermission' => ''
         );
+
         protected function updateRowInfo() : void{
             $mDataArray = \BoostPHP\MySQL::selectIntoArray_FromRequirements(Internal::$MySQLiConn, 'usergroups', array('groupname'=>$this->m_GroupName));
             if($mDataArray['count']<1){
@@ -29,11 +31,16 @@ namespace OPENAPI40{
             $this->updateRowInfo();
         }
 
+        public function delete() : void{
+            \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'usergroups',array('groupname'=>$this->m_GroupName));
+        }
+
         public function getGroupName() : string{
             return $this->m_GroupName;
         }
 
         public function setGroupName(string $newGroupName) : void{
+            Log::recordLogs(1,'GroupNameChanged(' . $this->getGroupName() . '):' . $this->getGroupName() . ' => ' . $newGroupName);
             $this->m_GroupRow['groupname'] = $newGroupName;
             $this->submitRowInfo();
             $this->m_GroupName = $newGroupName;
@@ -44,6 +51,7 @@ namespace OPENAPI40{
         }
 
         public function setDisplayName(string $newDisplayName) : void{
+            Log::recordLogs(1,'GroupDisplayNameChanged(' . $this->getGroupName() . '):' . $this->getDisplayName() . ' => ' . $newDisplayName);
             $this->m_GroupRow['groupdisplayname'] = $newDisplayName;
             $this->submitRowInfo();
         }
@@ -55,6 +63,7 @@ namespace OPENAPI40{
         }
 
         public function setPermissions(array $newPermission) : void{
+            Log::recordLogs(1,'GroupPermissionChanged(' . $this->getGroupName() . '):' . json_encode($this->getPermissions()) . ' => ' . json_encode($newPermission));
             foreach($newPermission as $SinglePermissionKey => &$SinglePermission){
                 $CanFind = false;
                 foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Permission'] as $PermField){
@@ -94,6 +103,17 @@ namespace OPENAPI40{
         }
 
         public function setPermission(string $permissionItem, bool $Value) : void{
+            $canFind = false;
+            foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Permission'] as $SinglePermField){
+                if($SinglePermField === $permissionItem){
+                    $canFind = true;
+                    break;
+                }
+            }
+            if(!$canFind){
+                return;
+            }
+
             $Permissions = $this->getPermissions();
             $Permissions[$permissionItem] = $Value ? 'true' : 'false';
             $this->setPermissions($Permissions);
@@ -158,6 +178,8 @@ namespace OPENAPI40{
                 throw new \Exception('Existence displayname');
                 return null;
             }
+
+            Log::recordLogs(1,'UserGroupCreated(' . $groupID . ')');
 
             $insertingArray = array(
                 'groupname' => $groupID,

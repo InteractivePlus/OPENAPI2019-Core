@@ -125,6 +125,7 @@ if(!$initState){
 );
 
 $normalGroup = OPENAPI40\UserGroup::createGroup("normalUsers","Normal_Users",array());
+OPENAPI40\Log::recordLogs(5,'System Installation');
 file_put_contents(__DIR__ . '/install.lock','Locked');
 
 require_once __DIR__ . '/../plugins/pluginInstallAutoLoad.php'; //安装所有插件

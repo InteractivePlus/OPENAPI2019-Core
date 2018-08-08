@@ -2,6 +2,7 @@
 namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
     require_once __DIR__ . '/APPs.php';
+    require_once __DIR__ . '/Logs.php';
     class UserAuth{
         protected $m_Username = '';
         protected $m_APPID = '';
@@ -32,6 +33,7 @@ namespace OPENAPI40{
             $this->updateRowInfo();
         }
         public function delete() : void{
+            Log::recordLogs(1,'UserAuthDeleted(APP:' . $this->getAPPID() . ',User:' . $this->getUsername() . ')');
             $myAPP = new APP($this->m_APPID);
             $myAPP->callUserDeletedURL($this->m_Username);
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn, 'userauth', $this->m_AuthRow, array('username'=>$this->m_Username,'appid'=>$this->m_APPID));
@@ -52,6 +54,7 @@ namespace OPENAPI40{
         }
 
         public function setAuthContent(array $AuthContent) : void{
+            Log::recordLogs(1,'AuthContentChanged(APP:' . $this->getAPPID() . ',User:' . $this->getUsername() . '):' . json_encode($this->getAuthContent()) . ' => ' . json_encode($AuthContent));
             foreach($AuthContent as $SingleAuthKey => &$SingleAuth){
                 $CanFind = false;
                 foreach($GLOBALS['OPENAPISettings']['Fieldnames']['UserAuth'] as $AuthField){
@@ -91,6 +94,17 @@ namespace OPENAPI40{
         }
 
         public function setAuthItem(string $itemName, bool $Value) : void{
+            $canFind = false;
+            foreach($GLOBALS['OPENAPISettings']['Fieldnames']['UserAuth'] as $SinglePermField){
+                if($SinglePermField === $itemName){
+                    $canFind = true;
+                    break;
+                }
+            }
+            if(!$canFind){
+                return;
+            }
+
             $Auths = $this->getAuthContent();
             $Auths[$itemName] = $Value ? 'true' : 'false';
             $this->setAuthContent($Auths);
@@ -146,6 +160,9 @@ namespace OPENAPI40{
                 throw new \Exception('Existence user');
                 return null;
             }
+            
+            Log::recordLogs(1,'UserAuthCreated(APP:' . $APPID . ',User:' . $Username . ')');
+
             foreach($GLOBALS['OPENAPISettings']['UserAuth']['defaultValues'] as $defaultKey => &$defaultVal){
                 if(empty($AuthContent[$defaultKey])){
                     $AuthContent[$defaultKey] = $defaultVal;

@@ -4,6 +4,7 @@ namespace OPENAPI40{
     require_once __DIR__ . '/APPs.php';
     require_once __DIR__ . '/UserAuth.php';
     require_once __DIR__ . '/UserGroup.php';
+    require_once __DIR__ . '/Logs.php';
 
     class User{
         protected $m_Username = '';
@@ -43,6 +44,7 @@ namespace OPENAPI40{
             $this->updateRowInfo();
         }
         public function delete() : bool{
+            Log::recordLogs(1,'UserDeleted(' . $this->getUsername() . ')');
             $UserOwnedAPPs = APP::getAPPsIfOwner($this->m_Username);
             if(!empty($UserOwnedAPPs)){
                 return false;
@@ -70,6 +72,7 @@ namespace OPENAPI40{
         }
 
         public function setUsername(string $newUsername){
+            Log::recordLogs(1,'UsernameChange(' . $this->getUsername() . '):' . $this->getUsername() . ' => ' . $newUsername);
             $this->m_UserRow['username'] = $newUsername;
             $this->submitRowInfo();
             $this->m_Username = $newUsername;
@@ -84,6 +87,7 @@ namespace OPENAPI40{
         }
 
         public function setPassword(string $newPassword) : void{
+            Log::recordLogs(1,'PasswordChange(' . $this->getUsername() . ')');
             $this->m_UserRow['password'] = md5(\BoostPHP\BoostPHP\Encryption\SHA::SHA256Encode($newPassword,$GLOBALS['OPENAPISettings']['Salt']));
             $this->submitRowInfo();
         }
@@ -138,6 +142,7 @@ namespace OPENAPI40{
         }
 
         public function assignNewToken(string $UserIP, string $newToken) : void{
+            Log::recordLogs(1,'UserTokenAssigned(' . $this->getUsername() . '):' . $newToken);
             $this->deleteRelatedToken();
             $insertData = array(
                 'token'=>$newToken,
@@ -155,6 +160,7 @@ namespace OPENAPI40{
         }
 
         public function assignNewVeriCode(int $ActionType, string $newVeriCode) : void{
+            Log::recordLogs(1,'UserVeriCodeAssigned(' . $this->getUsername() . '):' . $newVeriCode);
             $this->deleteRelatedVeriCode();
             $insertData = array(
                 'actiontype' => $ActionType,
@@ -166,6 +172,7 @@ namespace OPENAPI40{
         }
 
         public function deleteRelatedToken() : void{
+            Log::recordLogs(1,'UserTokenDeleted(' . $this->getUsername() . ')');
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'tokens',array('relateduser'=>$this->m_Username));
         }
 
@@ -174,6 +181,7 @@ namespace OPENAPI40{
         }
 
         public function deleteRelatedVeriCode() : void{
+            Log::recordLogs(1,'UserVeriCodeDeleted(' . $this->getUsername() . ')');
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'verificationcodes',array('username'=>$this->m_Username));
         }
 
@@ -182,6 +190,7 @@ namespace OPENAPI40{
         }
 
         public function setDisplayName(string $newDisplayName) : void{
+            Log::recordLogs(1,'UserDisplayNameChange(' . $this->getUsername() . '):' . $this->getDisplayName() . ' => ' . $newDisplayName);
             $this->m_UserRow['userdisplayname'] = $newDisplayName;
             $this->submitRowInfo();
         }
@@ -191,6 +200,7 @@ namespace OPENAPI40{
         }
 
         public function setEmail(string $newMail) : void{
+            Log::recordLogs(1,'UserMailChange(' . $this->getUsername() . '):' . $this->getEmail() . ' => ' . $newMail);
             $this->m_UserRow['email'] = $newMail;
             $this->submitRowInfo();
             return;
@@ -201,6 +211,7 @@ namespace OPENAPI40{
         }
 
         public function setSettings(array $newSettings) : void{
+            Log::recordLogs(1,'UserSettingChange(' . $this->getUsername() . '):' . json_encode($this->getSettings()) . ' => ' . json_encode($newSettings));
             foreach($newSettings as $SingleSettingKey => &$SingleSetting){
                 $CanFind = false;
                 foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Settings'] as $SettingField){
@@ -235,6 +246,17 @@ namespace OPENAPI40{
         }
 
         public function setSetting(string $settingItem, $value) : void{
+            $canFind = false;
+            foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Settings'] as $SinglePermField){
+                if($SinglePermField === $settingItem){
+                    $canFind = true;
+                    break;
+                }
+            }
+            if(!$canFind){
+                return;
+            }
+
             $Settings = $this->getSettings();
             $Settings[$settingItem] = $value;
             $this->setSettingsJSON($Settings);
@@ -245,6 +267,7 @@ namespace OPENAPI40{
         }
 
         public function setThirdAuths(array $newThirdAuth) : void{
+            Log::recordLogs(1,'ThirdAuthChange(' . $this->getUsername() . '):' . json_encode($this->getThirdAuths()) . ' => ' . json_encode($newThirdAuth));
             $this->m_UserRow['thirdauth'] = gzcompress(json_encode($newThirdAuth),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
@@ -266,6 +289,9 @@ namespace OPENAPI40{
 
         public function deleteThirdAuth(string $authName) : void{
             $ThirdAuths = $this->getThirdAuths();
+            if(empty($ThirdAuths[$authName])){
+                return;
+            }
             unset($ThirdAuths[$authName]);
             $this->setThirdAuths($ThirdAuths);
         }
@@ -280,6 +306,7 @@ namespace OPENAPI40{
         }
 
         public function setPermissions(array $newPermission) : void{
+            Log::recordLogs(1,'UserPermissionChange(' . $this->getUsername() . '):' . json_encode($this->getPermissions()) . ' => ' . json_encode($newPermission));
             foreach($newPermission as $SinglePermissionKey => &$SinglePermission){
                 $CanFind = false;
                 foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Permission'] as $PermField){
@@ -305,9 +332,7 @@ namespace OPENAPI40{
         }
 
         public function getPermission(string $permissionType) : bool{
-            $PermissionJSON = $this->getPermissionJSON();
-            $Permissions = json_decode($PermissionJSON,true);
-            unset($PermissionJSON);
+            $Permissions = $this->getPermissions();
             if(!empty($Permissions[$permissionType])){
                 if($Permissions[$permissionType] === 'true'){
                     return true;
@@ -320,12 +345,20 @@ namespace OPENAPI40{
         }
 
         public function setPermission(string $permissionType, bool $isPermissionAllowed) : void{
-            $PermissionJSON = $this->getPermissionJSON();
-            $Permissions = json_decode($PermissionJSON,true);
-            unset($PermissionJSON);
+            $canFind = false;
+            foreach($GLOBALS['OPENAPISettings']['Fieldnames']['Permission'] as $SinglePermField){
+                if($SinglePermField === $permissionType){
+                    $canFind = true;
+                    break;
+                }
+            }
+            if(!$canFind){
+                return;
+            }
+
+            $Permissions = $this->getPermissions();
             $Permissions[$permissionType] = $isPermissionAllowed ? 'true' : 'false';
-            $PermissionJSON = json_encode($Permissions);
-            $this->setPermissionJSON($PermissionJSON);
+            $this->setPermissions($Permissions);
         }
 
         public function getUserGroup() : string{
@@ -333,6 +366,7 @@ namespace OPENAPI40{
         }
 
         public function setUserGroup(string $newGroup) : void{
+            Log::recordLogs(1,'User GroupChange(' . $this->getUsername() . '):' . $this->getUserGroup() . ' => ' . $newGroup);
             $this->m_UserRow['usergroup'] = $newGroup;
             $this->submitRowInfo();
         }
@@ -342,6 +376,7 @@ namespace OPENAPI40{
         }
 
         public function setEmailVerifyStatus(bool $isVerified) : void{
+            Log::recordLogs(1,'User EmailVerifyStatusChange(' . $this->getUsername() . '):' . ($this->isMailVerified() ? 'true' : 'false') . ' => ' . ($isVerified ? 'true' : 'false'));
             $this->m_UserRow['emailverified'] = $isVerified ? 1 : 0;
             $this->submitRowInfo();
         }
@@ -355,18 +390,21 @@ namespace OPENAPI40{
         }
 
         public function setEmailVerifyCode(string $newVerifyCode) : void{
+            Log::recordLogs(1,'User VeriCode Change(' . $this->getUsername() . '):' . $newVerifyCode);
             $this->m_UserRow['emailverifycode'] = $newVerifyCode;
             $this->submitRowInfo();
         }
 
         public function sendEmailVerifyCode(string $Language = 'x-default') : bool{
+            Log::recordLogs(1,'User EmailVerification Sent(' . $this->getUsername() . ' => ' . $this->getEmail() . ')');
             //replace '`clientName`' and '`verifyLink`' in templates.
             if($Language !== 'cn' && $Language !== 'en'){
                 $Language = 'x-default';
             }
-            $VerifyURL = $GLOBALS['OPENAPISettings']['BlueAirLive']['BaseURL'][$Language] . $GLOBALS['OPENAPISettings']['BlueAirLive']['Pages']['VerifyEmail'] . $this->m_UserRow['emailverifycode'];
+            $VerifyURL = $GLOBALS['OPENAPISettings']['BlueAirLive']['BaseURL'][$Language] . $GLOBALS['OPENAPISettings']['BlueAirLive']['Pages']['VerifyEmail'] . '?VerifyCode=' . $this->m_UserRow['emailverifycode'] . '&Username=' . $this->getUsername();
             $EmailTemplate = $GLOBALS['OPENAPISettings']['Email']['VerifyTemplate'][$Language];
             $EmailTemplate['body'] = \str_replace('`clientName`',$this->getDisplayName(),$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`clientID`',$this->getUsername(),$EmailTemplate['body']);
             $EmailTemplate['body'] = \str_replace('`verifyLink`',$VerifyURL, $EmailTemplate['body']);
             $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
             return \BoostPHP\Mail::sendMail(
@@ -384,7 +422,8 @@ namespace OPENAPI40{
         }
 
         public function sendSecurityVerifyCode(string $Language = 'x-default', string $veriCode, int $ActionType) : bool{
-             //replace '`clientName`' and '`actionName`', '`veriCode`' in templates.
+            Log::recordLogs(1,'User SecurityCode Sent(' . $this->getUsername() . ' => ' . $this->getEmail() . '):' . $ActionType . '::' . $veriCode);
+            //replace '`clientName`' and '`actionName`', '`veriCode`' in templates.
             if($Language !== 'cn' && $Language !== 'en'){
                 $Language = 'x-default';
             }
@@ -522,6 +561,8 @@ namespace OPENAPI40{
                 throw new \Exception('Existence displayname');
                 return null;
             }
+
+            Log::recordLogs(1,'User Register(' . $Username . ')');
 
             if(empty($NickName))
                 $NickName = $Username;

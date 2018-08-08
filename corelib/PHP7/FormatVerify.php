@@ -1,6 +1,7 @@
 <?php
 namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
+    require_once __DIR__ . '/Logs.php';
     class FormatVerify{
         protected static function CheckLengthBetween(string $C_cahr, int $minLength, int $maxLength) : bool{    
             $C_cahr = trim($C_cahr);    

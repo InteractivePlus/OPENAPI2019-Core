@@ -1,6 +1,7 @@
 <?php
 namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
+    require_once __DIR__ . '/Logs.php';
     class APP{
         protected $m_APPID = '';
         protected $m_APPRow = array(
@@ -35,6 +36,7 @@ namespace OPENAPI40{
             $this->updateRowInfo();
         }
         public function delete() : void{
+            Log::recordLogs(1,'APPDeleted(' . $this->getGroupName() . ')');
             deleteFromUser($this->getOwnerUsername());
             $MangageUsers = $this->getManageUsers();
             foreach($MangageUsers as $SingleManager){
@@ -82,6 +84,7 @@ namespace OPENAPI40{
             return $this->m_APPID;
         }
         public function setAPPID(string $newAPPID) : void{
+            Log::recordLogs(1,'APPIDChange:' . $this->getAPPID() . ' => ' . $newAPPID);
             $this->m_APPRow['appid'] = $newAPPID;
             $this->submitRowInfo();
             $this->m_APPID = $newAPPID;
@@ -90,6 +93,7 @@ namespace OPENAPI40{
             return $this->m_APPRow['appdisplayname'];
         }
         public function setAPPDisplayName(string $newDisplayName) : void{
+            Log::recordLogs(1,'APPDisplayNameChange(' . $this->getAPPID() . '):' . $this->getAPPDisplayName() . ' => ' . $newAPPID);
             $this->m_APPRow['appdisplayname'] = $newDisplayName;
             $this->submitRowInfo();
         }
@@ -101,6 +105,7 @@ namespace OPENAPI40{
             }
         }
         public function setPassword(string $newPassword) : void{
+            Log::recordLogs(1,'APPDisplayNameChange(' . $this->getAPPID() . ')');
             $this->m_APPRow['apppass'] = self::encryptAPPPass($newPassword);
             $this->submitRowInfo();
         }
@@ -108,6 +113,7 @@ namespace OPENAPI40{
             return json_decode(gzuncompress($this->m_APPRow['apppermission']),true);
         }
         public function setPermissions(array $newPermission) : void{
+            Log::recordLogs(1,'APPPermissionChange(' . $this->getAPPID() . '):' . json_encode($this->getPermissions()) . ' => ' . json_encode($newPermission));
             foreach($newPermission as $SinglePermissionKey => &$SinglePermission){
                 $CanFind = false;
                 foreach($GLOBALS['OPENAPISettings']['Fieldnames']['APPPermission'] as $PermField){
@@ -143,6 +149,17 @@ namespace OPENAPI40{
             }
         }
         public function setPermission(string $permissionItem, bool $newValue) : void{
+            $canFind = false;
+            foreach($GLOBALS['OPENAPISettings']['Fieldnames']['APPPermission'] as $SinglePermField){
+                if($SinglePermField === $permissionItem){
+                    $canFind = true;
+                    break;
+                }
+            }
+            if(!$canFind){
+                return;
+            }
+
             $Permissions = $this->getPermissions();
             $Permissions[$permissionItem] = ($newValue ? 'true' : 'false');
             $this->setPermissions($Permissions);
@@ -153,6 +170,7 @@ namespace OPENAPI40{
         }
 
         public function setOwnerUsername(string $newOwner) : void{
+            Log::recordLogs(1,'APPOwnerChange(' . $this->getAPPID() . '):' . $this->getOwnerUsername() . ' => ' . $newOwner);
             $this->deleteFromUser($this->getOwnerUsername);
             $this->addToUser($newOwner);
             $this->m_APPRow['adminuser'] = $newOwner;
@@ -166,6 +184,7 @@ namespace OPENAPI40{
         }
 
         protected function setManageUsers(array $newManageList) : void{
+            Log::recordLogs(1,'APPManagerChange(' . $this->getAPPID() . '):' . json_encode($this->getManageUsers()) . ' => ' . json_encode($newManageList));
             $ManageUsersJSON = json_encode($newManageList);
             $this->m_APPRow['manageusers'] = gzcompress($ManageUsersJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
@@ -187,12 +206,17 @@ namespace OPENAPI40{
 
         public function deleteManageUser(string $Username) : void{
             $OriginalUser = $this->getManageUsers();
+            $Finded=false;
             for($i = 0; $i < count($OriginalUser); $i++){
                 $ManagerSingle = &$OriginalUser[$i];
                 if($ManagerSingle === $Username){
+                    $Finded=true;
                     unset($ManagerSingle);
                     break;
                 }
+            }
+            if(!$Finded){
+                return;
             }
             $this->setManageUsers($OriginalUser);
             $this->deleteFromUser($Username);
@@ -215,6 +239,7 @@ namespace OPENAPI40{
         }
 
         protected function setPendingUsers(array $newPendingUserList) : void{
+            Log::recordLogs(1,'APPPendingUserChange(' . $this->getAPPID() . '):' . json_encode($this->getPendingUsers()) . ' => ' . $newPendingUserList);
             $PendingUserJSON = json_encode($newPendingUserList);
             $this->m_APPRow['pendingusers'] = gzcompress($PendingUserJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
@@ -235,12 +260,17 @@ namespace OPENAPI40{
 
         public function deletePendingUser(string $Username) : void{
             $OriginalUser = $this->getPendingUsers();
+            $Finded=false;
             for($i = 0; $i < count($OriginalUser); $i++){
                 $PendingSingle = &$OriginalUser[$i];
                 if($PendingSingle === $Username){
+                    $Finded = true;
                     unset($PendingSingle);
                     break;
                 }
+            }
+            if(!$Finded){
+                return;
             }
             $this->setPendingUsers($OriginalUser);
             $this->deleteFromUser($Username);
@@ -269,6 +299,7 @@ namespace OPENAPI40{
         }
 
         public function sendThirdPartyEmail(string $toAddr, string $mailTitle, string $mailBody, string $Language) : bool{
+            Log::recordLogs(1,'APPMailSend(' . $this->getAPPID() . '):' . $mailTitle . ' => ' . $toAddr);
             if($Language !== 'cn' && $Language !== 'en'){
                 $Language = 'x-default';
             }
@@ -300,6 +331,7 @@ namespace OPENAPI40{
         }
 
         public function setAPPJumpBackPageURL(string $newURL) : void{
+            Log::recordLogs(1,'APPJumpPageChange(' . $this->getAPPID() . '):' . $this->getAPPJumpBackPageURL() . ' => ' . $newURL);
             $this->m_APPRow['appjumpbackpage'] = $newURL;
             $this->submitRowInfo();
         }
@@ -309,11 +341,13 @@ namespace OPENAPI40{
         }
 
         public function setUserDeletedCallBackURL(string $newURL) : void{
+            Log::recordLogs(1,'APPDelCallBackChange(' . $this->getAPPID() . '):' . $this->getUserDeletedCallBackURL() . ' => ' . $newURL);
             $this->m_APPRow['userdeletedcallback'] = $newURL;
             $this->submitRowInfo();
         }
 
         public function callUserDeletedURL($Username) : void{
+            Log::recordLogs(1,'UserDelURLCalled(' . $this->getAPPID() . '):' . $this->getUserDeletedCallBackURL() . ' => ' . $Username);
             $callingURL = $this->getUserDeletedCallBackURL();
             $callingParam = array('deletedUser'=>$Username);
             \BoostPHP\GeneralUtility::postToAddr($callingURL,$callingParam);
@@ -354,15 +388,18 @@ namespace OPENAPI40{
         }
 
         public function assignAPPToken(string $APPIP, string $Username, string $APPToken) : void{
+            Log::recordLogs(1,'APPTokenAssigned(' . $this->getAPPID() . '):' . $Username . ' => ' . $APPToken);
             $this->deleteRelatedToken($Username);
             \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn, 'apptokens', array('token'=>$APPToken, 'starttime'=>time(), 'relateduser'=>$Username, 'relatedapp'=>$this->m_APPID, 'tokenip'=>$APPIP));
         }
 
         public function deleteAllRelatedToken() : void{
+            Log::recordLogs(1,'APPTokenDeleted(' . $this->getAPPID() . ')');
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'apptokens',array('relatedapp'=>$this->m_APPID));
         }
 
         public function deleteRelatedToken(string $Username) : void{
+            Log::recordLogs(1,'APPTokenDeleted(' . $this->getAPPID() . '):' . $Username);
             \BoostPHP\MySQL::deleteRows(Internal::$MySQLiConn,'apptokens',array('relatedapp'=>$this->m_APPID,'relateduser'=>$Username));
         }
 
@@ -453,6 +490,7 @@ namespace OPENAPI40{
                 throw new \Exception("Existence displayname");
                 return null;
             }
+            Log::recordLogs(1,'APPCreated(' . $APPID . ') <= ' . $adminUser);
             $NewAPPRow = array(
                 'appid' => $APPID,
                 'appdisplayname' => $DisplayName,
