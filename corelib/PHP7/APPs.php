@@ -274,13 +274,13 @@ namespace OPENAPI40{
             }
 
             $EmailTemplate = $GLOBALS['OPENAPISettings']['Email']['ThirdPartyMail'][$Language];
-            $EmailTemplate['body'] = \str_replace($this->getAPPDisplayName(),'`appDisplayName`',$EmailTemplate['body']);
-            $EmailTemplate['body'] = \str_replace($this->getAPPID(), '`appID`', $EmailTemplate['body']);
-            $EmailTemplate['body'] = \str_replace($mailBody, '`thirdPartyMailBody`', $EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`appDisplayName`',$this->getAPPDisplayName(),$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`appID`', $this->getAPPID(), $EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`thirdPartyMailBody`', $mailBody, $EmailTemplate['body']);
             $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
-            $EmailTemplate['title'] = \str_replace($this->getAPPDisplayName(),'`appDisplayName`',$EmailTemplate['title']);
-            $EmailTemplate['title'] = \str_replace($this->getAPPID(), '`appID`', $EmailTemplate['title']);
-            $EmailTemplate['title'] = \str_replace($mailTitle,'`thirdPartyMailTitle`',$EmailTemplate['title']);
+            $EmailTemplate['title'] = \str_replace('`appDisplayName`',$this->getAPPDisplayName(),$EmailTemplate['title']);
+            $EmailTemplate['title'] = \str_replace('`appID`', $this->getAPPID(), $EmailTemplate['title']);
+            $EmailTemplate['title'] = \str_replace('`thirdPartyMailTitle`',$mailTitle,$EmailTemplate['title']);
             return \BoostPHP\Mail::sendMail(
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPHost'],

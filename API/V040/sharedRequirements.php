@@ -1,9 +1,9 @@
-<?
+<?php
 require_once __DIR__ . '/../../extlibs/BoostPHP/autoload.php';
 require_once __DIR__ . '/../../corelib/autoload.php';
 
 
-function returnJSON($Array) : void{
+function returnJSON($Array){
     OPENAPI40\Internal::DestroyOPENAPI();
     exit(json_encode($Array));
 }

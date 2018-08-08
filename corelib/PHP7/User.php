@@ -355,8 +355,8 @@ namespace OPENAPI40{
             }
             $VerifyURL = $GLOBALS['OPENAPISettings']['BlueAirLive']['BaseURL'][$Language] . $GLOBALS['OPENAPISettings']['BlueAirLive']['Pages']['VerifyEmail'] . $this->m_UserRow['emailverifycode'];
             $EmailTemplate = $GLOBALS['OPENAPISettings']['Email']['VerifyTemplate'][$Language];
-            $EmailTemplate['body'] = \str_replace($this->getDisplayName(),'`clientName`',$EmailTemplate['body']);
-            $EmailTemplate['body'] = \str_replace($VerifyURL, '`verifyLink`',$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`clientName`',$this->getDisplayName(),$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`verifyLink`',$VerifyURL, $EmailTemplate['body']);
             $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
             return \BoostPHP\Mail::sendMail(
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
@@ -380,9 +380,9 @@ namespace OPENAPI40{
             $actionName = $GLOBALS['OPENAPISettings']['VeriCode']['ActionTypes'][$ActionType][$Language];
 
             $EmailTemplate = $GLOBALS['OPENAPISettings']['Email']['VeriCodeTemplate'][$Language];
-            $EmailTemplate['body'] = \str_replace($this->getDisplayName(),'`clientName`',$EmailTemplate['body']);
-            $EmailTemplate['body'] = \str_replace($actionName, '`actionName`',$EmailTemplate['body']);
-            $EmailTemplate['body'] = \str_replace($veriCode, '`veriCode`', $EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`clientName`',$this->getDisplayName(),$EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`actionName`', $actionName, $EmailTemplate['body']);
+            $EmailTemplate['body'] = \str_replace('`veriCode`', $veriCode, $EmailTemplate['body']);
             $EmailTemplate['body'] = $GLOBALS['OPENAPISettings']['Email']['SharedTop'][$Language] . $EmailTemplate['body'] . $GLOBALS['OPENAPISettings']['Email']['SharedBottom'][$Language];
             return \BoostPHP\Mail::sendMail(
                 $GLOBALS['OPENAPISettings']['Email']['Account']['SMTPPort'],
