@@ -18,8 +18,10 @@ $ReplaceValues = array(
     'SMTPSenderName' => $_POST['SMTPSenderName'],
     'SMTPSecureConnection' => $_POST['SMTPSecureConnection'],
 
-    'EncryptionSalt' => $POST['EncryptionSalt']
+    'EncryptionSalt' => $_POST['EncryptionSalt'],
 );
+$AdminPassword = $_POST['AdminPassword'];
+$AdminEmail = $_POST['AdminEmail'];
 
 
 $settingFile = file_get_contents(__DIR__ . '/../settings.php-template');
@@ -125,6 +127,14 @@ if(!$initState){
 );
 
 $normalGroup = OPENAPI40\UserGroup::createGroup("normalUsers","Normal_Users",array());
+$adminUser = OPENAPI40\User::registerUser("admin",$AdminPassword,$AdminEmail,'总管理员',array());
+$adminUser->setPermissions(array(
+    'EditUsers' => 'true',
+    'ViewLogs' => 'true',
+    'ManageUserGroups' => 'true',
+    'ChangeUserPermissions' => 'true',
+    'ModifyAPPIDs' => 'true'
+));
 OPENAPI40\Log::recordLogs(5,'System Installation');
 file_put_contents(__DIR__ . '/install.lock','Locked');
 
