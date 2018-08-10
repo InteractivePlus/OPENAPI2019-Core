@@ -77,7 +77,7 @@ namespace OPENAPI40{
                 }
             }
             $PermissionJSON = json_encode($newPermission);
-            $this->m_GroupRow['grouppermission'] = gzcompress($PermissionJSON,$GLOABLS['OPENAPISettings']['CompressIntensity']);
+            $this->m_GroupRow['grouppermission'] = gzcompress($PermissionJSON,$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 

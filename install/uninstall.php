@@ -6,7 +6,7 @@ if(file_exists(__DIR__ . '/install.lock')){
     generalReturn(true,"install.lock已被锁定, 请删除/install/install.lock后重新安装");
 }
 
-$initState = OPENAPI40\Internal::InitializeOPENAPI();
+$initState = \OPENAPI40\Internal::InitializeOPENAPI();
 if(!$initState){
     generalReturn(true,'连接数据库失败!');
 }
@@ -24,4 +24,3 @@ require_once __DIR__ . '/../plugins/pluginUninstallAutoLoad.php'; //卸载所有
         `apps`
     ;'
 );
-OPENAPI40\Internal::DestroyOPENAPI();

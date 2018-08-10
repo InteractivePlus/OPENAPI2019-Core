@@ -19,6 +19,7 @@ $ReplaceValues = array(
     'SMTPSecureConnection' => $_POST['SMTPSecureConnection'],
 
     'EncryptionSalt' => $_POST['EncryptionSalt'],
+    'frontendURL' => $_POST['FrontEndURL']
 );
 $AdminPassword = $_POST['AdminPassword'];
 $AdminEmail = $_POST['AdminEmail'];
@@ -31,7 +32,8 @@ foreach($ReplaceValues as $SingleUserDefField => $SingleUserDefVal){
 file_put_contents(__DIR__ . '/../settings.php',$settingFile);
 require_once __DIR__ . '/../corelib/autoload.php';
 require_once __DIR__ . '/uninstall.php'; //uninstall first
-$initState = OPENAPI40\Internal::InitializeOPENAPI();
+
+$initState = \OPENAPI40\Internal::InitializeOPENAPI();
 if(!$initState){
     generalReturn(true,'连接数据库失败!');
 }
@@ -139,6 +141,4 @@ OPENAPI40\Log::recordLogs(5,'System Installation');
 file_put_contents(__DIR__ . '/install.lock','Locked');
 
 require_once __DIR__ . '/../plugins/pluginInstallAutoLoad.php'; //安装所有插件
-
-OPENAPI40\Internal::DestroyOPENAPI();
 generalReturn(false,"No error","cn");

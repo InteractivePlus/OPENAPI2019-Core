@@ -141,8 +141,8 @@ $OPENAPISettings['UserAuth']['defaultValues'] = array(
     "sendEmailToMe" => "false"
 );
 
-$OPENAPISettings['BlueAirLive']['BaseURL']['cn'] = 'https://ucenter.xsyds.cn/cn/';
-$OPENAPISettings['BlueAirLive']['BaseURL']['en'] = 'https://ucenter.xsyds.cn/en/';
+$OPENAPISettings['BlueAirLive']['BaseURL']['cn'] = '`frontendURL`/cn/';
+$OPENAPISettings['BlueAirLive']['BaseURL']['en'] = '`frontendURL`/en/';
 $OPENAPISettings['BlueAirLive']['BaseURL']['x-default'] = &$OPENAPISettings['BlueAirLive']['BaseURL'][$OPENAPISettings['DefaultLanguage']];
 $OPENAPISettings['BlueAirLive']['Pages']['VerifyEmail'] = 'emailVerification.html';
 

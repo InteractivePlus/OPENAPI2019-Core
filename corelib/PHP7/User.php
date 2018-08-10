@@ -319,7 +319,7 @@ namespace OPENAPI40{
                     unset($SinglePermission);
                 }
             }
-            $this->m_UserRow['userpermission'] = gzcompress(json_encode($newPermissionJSON),$GLOBALS['OPENAPISettings']['CompressIntensity']);
+            $this->m_UserRow['userpermission'] = gzcompress(json_encode($newPermission),$GLOBALS['OPENAPISettings']['CompressIntensity']);
             $this->submitRowInfo();
         }
 
@@ -572,7 +572,7 @@ namespace OPENAPI40{
                 'userdisplayname' => $NickName,
                 'password' => self::encryptPassword($Password,$GLOBALS['OPENAPISettings']['Salt']),
                 'email' => $Email,
-                'settings' => gzcompress(json_encode($OverSettings),$GLOABLS['OPENAPISettings']['CompressIntensity']),
+                'settings' => gzcompress(json_encode($OverSettings),$GLOBALS['OPENAPISettings']['CompressIntensity']),
                 'thirdauth' => $GLOBALS['OPENAPISettings']['User']['defaultValues']['thirdauth'],
                 'emailverified' => false,
                 'emailverifycode' => self::generateVerifyCode($Username),

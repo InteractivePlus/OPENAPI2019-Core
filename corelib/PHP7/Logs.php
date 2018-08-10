@@ -3,7 +3,7 @@ namespace OPENAPI40{
     require_once __DIR__ . '/internal/OPENAPI.internal.php';
     class Log{
         public static function recordLogs(int $LogLevel, string $LogContent = '') : void{
-            \BoostPHP\MySQL::inserRow(Internal::$MySQLiConn,'log',array('loglevel'=>$LogLevel,'logcontent'=>gzcompress($LogContent,$GLOBALS['OPENAPISettings']['CompressIntensity']),'logtime'=>time()));
+            \BoostPHP\MySQL::insertRow(Internal::$MySQLiConn,'log',array('loglevel'=>$LogLevel,'logcontent'=>gzcompress($LogContent,$GLOBALS['OPENAPISettings']['CompressIntensity']),'logtime'=>time()));
         }
         public static function deleteLogs(int $LogLevel = -1, string $LogContent = '', int $LogTime = -1) : void{
             $SelectRequirement = array();
@@ -42,5 +42,4 @@ namespace OPENAPI40{
             return $OverallRst;
         }
     }
-    Log::deleteExpiredLogs();
 }

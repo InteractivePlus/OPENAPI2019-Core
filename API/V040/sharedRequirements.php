@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
 require_once __DIR__ . '/../../extlibs/BoostPHP/autoload.php';
 require_once __DIR__ . '/../../corelib/autoload.php';
 
