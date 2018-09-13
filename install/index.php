@@ -137,6 +137,7 @@ $adminUser->setPermissions(array(
     'ChangeUserPermissions' => 'true',
     'ModifyAPPIDs' => 'true'
 ));
+$adminUser->sendEmailVerifyCode();
 OPENAPI40\Log::recordLogs(5,'System Installation');
 file_put_contents(__DIR__ . '/install.lock','Locked');
 

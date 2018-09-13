@@ -10,7 +10,9 @@ if(!OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
 }
 $myUser = new OPENAPI40\User($Username);
-//Check if user has already verified his/her email
+if(!$myUser->checkPassword($Password)){
+    generalReturn(true,1,$Language);
+}
 if($myUser->isMailVerified()){
     generalReturn(true,5,$Language);
 }
