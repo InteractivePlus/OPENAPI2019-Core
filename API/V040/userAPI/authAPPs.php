@@ -9,7 +9,7 @@ if(empty($manageUsername) || empty($Token) || empty($Username) || empty($APPID))
     generalReturn(true,7,$Language);
 }
 
-if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){
+if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username) || !OPENAPI40\APP::checkExist($APPID)){
     generalReturn(true,2,$Language);
 }
 $manageUser = new OPENAPI40\User($manageUsername);
@@ -21,6 +21,8 @@ if($manageUsername !== $Username){
         generalReturn(true,8,$Language);
     }
 }
+
+
 
 $AuthRecordExist = OPENAPI40\UserAuth::checkExist($Username,$APPID);
 if(!$AuthRecordExist && !empty($Permissions)){
