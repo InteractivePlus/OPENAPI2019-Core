@@ -6,7 +6,7 @@ $Username = $_POST['changingUserName'];
 $NewMail = $_POST['newMail'];
 $VeriCode = $_POST['veriCode'];
 
-if(empty($manageUsername) || empty($Token) || empty($Username) || empty($newMail)){
+if(empty($manageUsername) || empty($Token) || empty($Username) || empty($NewMail)){
     generalReturn(true,7,$Language);
 }
 

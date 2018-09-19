@@ -135,6 +135,10 @@ namespace OPENAPI40{
             return $GLOBALS['OPENAPISettings']['VeriCode']['ActionTypes'][$Action]['needToken'];
         }
 
+        public static function checkActionExist(int $Action) : bool{
+            return (!empty($GLOBALS['OPENAPISettings']['VeriCode']['ActionTypes'][$Action]));
+        }
+
         public function autoAssignNewToken(string $UserIP) : string{
             $newToken = self::generateToken($this->m_Username);
             $this->assignNewToken($UserIP,$newToken);

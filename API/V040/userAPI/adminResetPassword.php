@@ -16,16 +16,20 @@ $manageUser = new OPENAPI40\User($manageUsername);
 if(!$manageUser->checkToken($Token,$IP)){
     generalReturn(true,1,$Language);
 }
+
 if($manageUsername !== $Username){
     if(!$manageUser->checkHasPermission('EditUsers')){
         generalReturn(true,8,$Language);
     }
-}else{
+}else{ //not admin, return permission error(needs vericode)
     generalReturn(true,8,$Language);
 }
+
 if(!OPENAPI40\FormatVerify::checkPassword($Password)){
     generalReturn(true,7,$Language);
 }
+
 $myUser = new OPENAPI40\User($Username);
 $myUser->setPassword($Password);
+$myUser->deleteRelatedToken();
 generalReturn(false,0,$Language);

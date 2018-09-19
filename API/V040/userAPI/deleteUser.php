@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../sharedRequirements.php';
-$mangaeUsername = $_POST['userName'];
+$manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $Username = $_POST['deletingUserName'];
 $VeriCode = $_POST['verificationCode'];
@@ -8,7 +8,7 @@ $VeriCode = $_POST['verificationCode'];
 if(empty($manageUsername) || empty($Token) || empty($Username)){
     generalReturn(true,7,$Language);
 }
-if($mangaeUsername === $Username && empty($VeriCode)){
+if($manageUsername === $Username && empty($VeriCode)){
     generalReturn(true,7,$Language);
 }
 

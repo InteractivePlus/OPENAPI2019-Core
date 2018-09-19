@@ -7,6 +7,9 @@ if(empty($Username) || empty($Token) || empty($Action)){
     generalReturn(true,7,$Language);
 }
 $ActionID = inval($Action);
+if(!OPENAPI40\User::checkActionExist($ActionID)){
+    generalReturn(true,7,$Language);
+}
 $NeedToken = OPENAPI40\User::checkActionNeedToken($ActionID);
 if(!OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
@@ -17,6 +20,6 @@ if($NeedToken){
         generalReturn(true,1,$Language);
     }
 }
-$newVeriCode = $myUser->autoAssignNewVeriCode();
+$newVeriCode = $myUser->autoAssignNewVeriCode($ActionID);
 $myUser->sendSecurityVerifyCode($Language,$newVeriCode,$ActionID);
 generalReturn(false,0,$Language);

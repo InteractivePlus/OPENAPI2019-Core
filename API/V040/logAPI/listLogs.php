@@ -7,7 +7,7 @@ $minimumLevel = $_POST['minimumLevel'];
 if(empty($manageUsername) || empty($Token) || empty($minimumLevel)){
     generalReturn(true,7,$Language);
 }
-if($minimumLevel < 1){
+if($minimumLevel < 1 || minimumLevel > 5){
     generalReturn(true,7,$Language);
 }
 if(!OPENAPI40\User::checkExist($manageUsername)){

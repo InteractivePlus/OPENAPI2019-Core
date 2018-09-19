@@ -3,6 +3,11 @@ require_once __DIR__ . '/../sharedRequirements.php';
 $manageUsername = $_POST['userName'];
 $Token = $_POST['token'];
 $searchingUsername = $_POST['findingUser'];
+
+if(empty($searchingUsername)){
+    $searchingUsername = '';
+}
+
 if(empty($manageUsername) || empty($Token)){
     generalReturn(true,7,$Language);
 }

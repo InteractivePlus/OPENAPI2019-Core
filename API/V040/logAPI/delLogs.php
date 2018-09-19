@@ -18,5 +18,5 @@ if(!$manageUser->checkToken($Token,$IP)){
 if(!$manageUser->checkHasPermission('ViewLogs')){
     generalReturn(true,8,$Language);
 }
-OPENAPI40\Log::deleteLogs($LogLevel,'',$LogLevel);
+OPENAPI40\Log::deleteLogs($LogLevel,'',$LogTime);
 generalReturn(false,0,$Language);
