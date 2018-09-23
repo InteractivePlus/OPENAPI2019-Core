@@ -37,5 +37,5 @@ foreach($userArray as &$singleUser){
     $singleUser->setUserGroup($NewGroupName);
 }
 $myUserGroup = new OPENAPI40\UserGroup($GroupName);
-$myUserGroup.delete();
+$myUserGroup->delete();
 generalReturn(false,0,$Language);

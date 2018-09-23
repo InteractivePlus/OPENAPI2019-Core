@@ -24,6 +24,14 @@ if(!$myAPP->getOwnerUsername() === $Username){
         generalReturn(false,8,$Language);
     }
 }
-
+$UserInAPP = $myAPP->isUserInAPP($NewOwner);
+if($UserInAPP === "PendingUser" || $UserInAPP === "false"){ //UserInAPP !== ManageUser && UserInAPP !== PendingUser
+    generalReturn(true,8,$Language);
+}
+$myAPP->deleteFromBothList($NewOwner);
+$OldOwner = $myAPP -> getOwnerUsername();
 $myAPP->setOwnerUsername($NewOwner);
+$myAPP->addManageUser($OldOwner);
+
+
 generalReturn(false,0,$Language);

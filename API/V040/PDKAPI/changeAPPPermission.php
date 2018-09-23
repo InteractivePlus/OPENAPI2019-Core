@@ -19,7 +19,7 @@ if(!OPENAPI40\APP::checkExist($APPID)){
     generalReturn(true,4,$Language);
 }
 $myAPP = new OPENAPI40\APP($APPID);
-if(!$myAPP->getOwnerUsername() === $manageUsername && !$myAPP->isManageUser($manageUsername)){
+if(($myAPP->getOwnerUsername() !== $manageUsername) && !$myAPP->isManageUser($manageUsername)){
     if(!$manageUser->checkHasPermission('ModifyAPPIDs')){
         generalReturn(true,8,$Language);
     }

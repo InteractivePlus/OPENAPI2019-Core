@@ -30,7 +30,7 @@ if(strtolower($Language) === 'zh-cn' || strtolower($Language) === 'zh' || strtol
 }else{
     $Language = 'x-default';
 }
-$IP = \BoostPHP\GeneralUtility::getUserIP();
+$IP = \BoostPHP\GeneralUtility::getUserIP(true);
 $APIInitState = OPENAPI40\Internal::InitializeOPENAPI();
 if(!$APIInitState){
     generalReturn(true,500,$Language);

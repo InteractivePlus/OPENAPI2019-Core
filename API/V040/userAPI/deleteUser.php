@@ -11,6 +11,9 @@ if(empty($manageUsername) || empty($Token) || empty($Username)){
 if($manageUsername === $Username && empty($VeriCode)){
     generalReturn(true,7,$Language);
 }
+if($Username === 'admin'){
+    generalReturn(true,8,$Language);
+}
 
 if(!OPENAPI40\User::checkExist($manageUsername) || !OPENAPI40\User::checkExist($Username)){
     generalReturn(true,2,$Language);
